@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import DarkVeil from './components/DarkVeil';
@@ -41,43 +41,24 @@ const skillsData = [
 ];
 
 type Project = {
+  id: number;
   title: string;
   description: string;
   stack: string[];
   image: string;
   link: string;
   reversed: boolean;
-  highlights?: string[];
 };
 
-const projectsData: Project[] = [
-  {
-    title: "SkillSpill",
-    description: "A CV-less hiring platform where recruiters discover and hire talent based on verified skills. Features an AI matching engine with NLP embeddings and LLM-driven GitHub code-quality analysis.",
-    stack: ["Next.js", "TypeScript", "MySQL", "Python", "Groq API"],
-    image: "/assets/skillspill.png",
-    link: "https://skillspill.app",
-    reversed: false
-  },
-  {
-    title: "Devshift",
-    description: "A creative playground built to express frontend design concepts. It features unique layouts and smooth animations that reflect my personal design philosophy.",
-    stack: ["Next.js", "Node.js", "Framer Motion"],
-    image: "/assets/devshift.png",
-    link: "https://devshift.vercel.app",
-    reversed: true
-  },
-  {
-    title: "Corpulate",
-    description: "A comprehensive platform for company registration. It features a role-based dashboard, integrated Stripe payments, and seamless client management and onboarding systems. (Currently under development)",
-    stack: ["Next.js", "Node.js", "PostgreSQL"],
-    image: "/assets/corpulate.png",
-    link: "https://corpulate-kappa.vercel.app/",
-    reversed: false
-  }
-];
-
 export default function Home() {
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    fetch('/api/projects')
+      .then((r) => r.json())
+      .then((data: Project[]) => setProjects(data))
+      .catch(() => {/* silently fall back to empty list */});
+  }, []);
 
   useEffect(() => {
     // Register GSAP plugins
@@ -472,7 +453,7 @@ export default function Home() {
             <div className="section-container">
               <h2 className="section-title">Selected Work</h2>
               <div className="projects-showcase">
-                {projectsData.map((project, index) => (
+                {projects.map((project, index) => (
                   <article key={index} className={`project-row ${project.reversed ? 'reversed' : ''}`}>
                     <div className="project-visual">
                       <img src={project.image} alt={project.title} loading="lazy" />

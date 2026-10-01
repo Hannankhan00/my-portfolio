@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import './admin.css';
 
 type Project = {
-  id: string;
+  id: number;
   title: string;
   description: string;
   stack: string[];
@@ -28,7 +28,7 @@ export default function AdminDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
     }
   }
 
-  async function handleDelete(id: string, title: string) {
+  async function handleDelete(id: number, title: string) {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
     setDeletingId(id);
     try {

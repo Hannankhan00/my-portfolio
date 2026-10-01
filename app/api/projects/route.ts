@@ -1,29 +1,33 @@
 import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { sql } from '@/lib/db';
 
 const SESSION_TOKEN = 'admin_session';
 const SESSION_VALUE = 'authenticated';
-const DATA_PATH = path.join(process.cwd(), 'data', 'projects.json');
 
 async function isAuthenticated(): Promise<boolean> {
   const cookieStore = await cookies();
   return cookieStore.get(SESSION_TOKEN)?.value === SESSION_VALUE;
 }
 
-async function readProjects() {
-  const raw = await fs.readFile(DATA_PATH, 'utf-8');
-  return JSON.parse(raw);
-}
-
-async function writeProjects(projects: unknown[]) {
-  await fs.writeFile(DATA_PATH, JSON.stringify(projects, null, 2), 'utf-8');
-}
+export type ProjectRow = {
+  id: number;
+  title: string;
+  description: string;
+  stack: string[];
+  image: string;
+  link: string;
+  reversed: boolean;
+  created_at: string;
+};
 
 export async function GET() {
-  const raw = await fs.readFile(DATA_PATH, 'utf-8');
-  return Response.json(JSON.parse(raw));
+  const rows = (await sql`
+    SELECT id, title, description, stack, image, link, reversed, created_at
+    FROM projects
+    ORDER BY created_at ASC
+  `) as ProjectRow[];
+  return Response.json(rows);
 }
 
 export async function POST(request: NextRequest) {
@@ -35,22 +39,24 @@ export async function POST(request: NextRequest) {
   const { title, description, stack, image, link, reversed } = body;
 
   if (!title || !description || !link) {
-    return Response.json({ error: 'title, description and link are required' }, { status: 400 });
+    return Response.json(
+      { error: 'title, description and link are required' },
+      { status: 400 }
+    );
   }
 
-  const projects = await readProjects();
-  const newProject = {
-    id: Date.now().toString(),
-    title: String(title).trim(),
-    description: String(description).trim(),
-    stack: Array.isArray(stack) ? stack.map(String) : [],
-    image: String(image ?? '').trim(),
-    link: String(link).trim(),
-    reversed: Boolean(reversed),
-  };
+  const stackArr: string[] = Array.isArray(stack) ? stack.map(String) : [];
+  const imageStr = String(image ?? '').trim();
+  const linkStr = String(link).trim();
+  const titleStr = String(title).trim();
+  const descStr = String(description).trim();
+  const reversedBool = Boolean(reversed);
 
-  projects.push(newProject);
-  await writeProjects(projects);
+  const rows = (await sql`
+    INSERT INTO projects (title, description, stack, image, link, reversed)
+    VALUES (${titleStr}, ${descStr}, ${stackArr}, ${imageStr}, ${linkStr}, ${reversedBool})
+    RETURNING id, title, description, stack, image, link, reversed, created_at
+  `) as ProjectRow[];
 
-  return Response.json(newProject, { status: 201 });
+  return Response.json(rows[0], { status: 201 });
 }

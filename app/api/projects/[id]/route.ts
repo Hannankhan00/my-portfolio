@@ -1,11 +1,9 @@
 import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { sql } from '@/lib/db';
 
 const SESSION_TOKEN = 'admin_session';
 const SESSION_VALUE = 'authenticated';
-const DATA_PATH = path.join(process.cwd(), 'data', 'projects.json');
 
 async function isAuthenticated(): Promise<boolean> {
   const cookieStore = await cookies();
@@ -21,14 +19,19 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  const raw = await fs.readFile(DATA_PATH, 'utf-8');
-  const projects: { id: string }[] = JSON.parse(raw);
-  const filtered = projects.filter((p) => p.id !== id);
+  const numericId = parseInt(id, 10);
 
-  if (filtered.length === projects.length) {
+  if (isNaN(numericId)) {
+    return Response.json({ error: 'Invalid project ID' }, { status: 400 });
+  }
+
+  const rows = await sql`
+    DELETE FROM projects WHERE id = ${numericId} RETURNING id
+  `;
+
+  if (!rows || rows.length === 0) {
     return Response.json({ error: 'Project not found' }, { status: 404 });
   }
 
-  await fs.writeFile(DATA_PATH, JSON.stringify(filtered, null, 2), 'utf-8');
   return Response.json({ success: true });
 }
