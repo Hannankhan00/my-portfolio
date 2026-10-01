@@ -371,7 +371,7 @@ export default function Home() {
           {/* Hero Section */}
           <section id="hero" className="hero">
             <div className="hero-content">
-              <h1 className="hero-name" id="hero-name">Khadija Mansoor</h1>
+              <h1 className="hero-name" id="hero-name">Hannan Khan</h1>
               <p className="hero-subtitle" id="hero-subtitle">
                 Full Stack Developer · Building end-to-end digital products that are fast, scalable, and beautifully crafted
               </p>
@@ -388,7 +388,7 @@ export default function Home() {
               <div className="about-text">
                 <h2 className="section-title">About Me</h2>
                 <p className="about-body">
-                  Hey! I&apos;m <strong>Khadija Mansoor</strong> a Full Stack Developer based in
+                  Hey! I&apos;m <strong>Hannan Khan</strong> a Full Stack Developer based in
                   Pakistan with a passion for building beautiful, high-performance digital
                   experiences from the ground up.
                 </p>
@@ -421,12 +421,12 @@ export default function Home() {
               {/* Right — ProfileCard */}
               <div className="about-card">
                 <ProfileCard
-                  name="Khadija Mansoor"
+                  name="Hannan Khan"
                   title="Full Stack Developer"
-                  handle="khadijamansoor"
+                  handle="hannankhan"
                   status="Open to work ✦"
                   contactText="Hire Me"
-                  avatarUrl="/assets/khadija.png"
+                  avatarUrl="/assets/hannankhan.png"
                   showUserInfo={false}
                   enableTilt={true}
                   enableMobileTilt={false}
@@ -501,13 +501,13 @@ export default function Home() {
               <p className="connect-text">I'm open to internships, freelance projects, and collaborations.</p>
 
               <div className="connect-links" id="connect-links">
-                <a href="https://github.com/khadijamansoor" target="_blank" rel="noopener noreferrer" className="connect-row">
+                <a href="https://github.com/Hannankhan00" target="_blank" rel="noopener noreferrer" className="connect-row">
                   <svg className="connect-icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
                   </svg>
                   <span className="connect-label">GitHub</span>
                 </a>
-                <a href="https://www.linkedin.com/in/khadija-mansoor-dev" target="_blank" rel="noopener noreferrer" className="connect-row">
+                <a href="https://www.linkedin.com/in/hannankhan" target="_blank" rel="noopener noreferrer" className="connect-row">
                   <svg className="connect-icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
                     <rect x="2" y="9" width="4" height="12" />
@@ -515,12 +515,12 @@ export default function Home() {
                   </svg>
                   <span className="connect-label">LinkedIn</span>
                 </a>
-                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=khadijamansoor47@gmail.com" target="_blank" rel="noopener noreferrer" className="connect-row">
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=hannankhan@gmail.com" target="_blank" rel="noopener noreferrer" className="connect-row">
                   <svg className="connect-icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                     <polyline points="22,6 12,13 2,6" />
                   </svg>
-                  <span className="connect-label">khadijamansoor47@gmail.com</span>
+                  <span className="connect-label">hannankhan@gmail.com</span>
                 </a>
               </div>
             </div>
@@ -529,7 +529,7 @@ export default function Home() {
 
         <footer className="footer">
           <div className="section-container footer-content">
-            <p className="copyright">© 2026 Khadija Mansoor · Designed with love</p>
+            <p className="copyright">© 2026 Hannan Khan · Designed with love</p>
           </div>
         </footer>
       </div>

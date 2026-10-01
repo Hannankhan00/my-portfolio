@@ -41,7 +41,7 @@ interface ProfileCardProps {
 }
 
 const ProfileCardComponent = ({
-  avatarUrl = '/assets/khadija.png',
+  avatarUrl = '/assets/hannankhan.png',
   iconUrl,
   grainUrl,
   innerGradient,
@@ -53,9 +53,9 @@ const ProfileCardComponent = ({
   enableMobileTilt = false,
   mobileTiltSensitivity = 5,
   miniAvatarUrl,
-  name = 'Khadija Mansoor',
+  name = 'Hannan Khan',
   title = 'Full Stack Developer',
-  handle = 'khadijamansoor',
+  handle = 'hannankhan',
   status = 'Online',
   contactText = 'Contact',
   showUserInfo = true,

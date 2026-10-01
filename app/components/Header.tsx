@@ -62,11 +62,11 @@ export default function Header() {
           <a
             href="#"
             className="nav-logo"
-            aria-label="Khadija Mansoor Home"
+            aria-label="Hannan Khan Home"
             tabIndex={isOpen ? 0 : -1}
             onClick={() => setOpen(false)}
           >
-            <img src="/assets/icon.png" alt="KM Logo" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
+            <img src="/assets/icon.png" alt="HK Logo" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
           </a>
           <ul className="nav-links">
             <li>
