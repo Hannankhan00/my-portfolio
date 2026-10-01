@@ -1,0 +1,29 @@
+[
+  {
+    "id": "1",
+    "title": "SkillSpill",
+    "description": "A CV-less hiring platform where recruiters discover and hire talent based on verified skills. Features an AI matching engine with NLP embeddings and LLM-driven GitHub code-quality analysis.",
+    "stack": ["Next.js", "TypeScript", "MySQL", "Python", "Groq API"],
+    "image": "/assets/skillspill.png",
+    "link": "https://skillspill.app",
+    "reversed": false
+  },
+  {
+    "id": "2",
+    "title": "Devshift",
+    "description": "A creative playground built to express frontend design concepts. It features unique layouts and smooth animations that reflect my personal design philosophy.",
+    "stack": ["Next.js", "Node.js", "Framer Motion"],
+    "image": "/assets/devshift.png",
+    "link": "https://devshift.vercel.app",
+    "reversed": true
+  },
+  {
+    "id": "3",
+    "title": "Corpulate",
+    "description": "A comprehensive platform for company registration. It features a role-based dashboard, integrated Stripe payments, and seamless client management and onboarding systems. (Currently under development)",
+    "stack": ["Next.js", "Node.js", "PostgreSQL"],
+    "image": "/assets/corpulate.png",
+    "link": "https://corpulate-kappa.vercel.app/",
+    "reversed": false
+  }
+]
