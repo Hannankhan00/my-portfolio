@@ -515,6 +515,15 @@ export default function Home() {
                   </svg>
                   <span className="connect-label">LinkedIn</span>
                 </a>
+                <a href="https://www.instagram.com/hannankhan" target="_blank" rel="noopener noreferrer" className="connect-row">
+                  <svg className="connect-icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                    <circle cx="12" cy="12" r="4" />
+                    <circle cx="17.5" cy="6.5" r="0" fill="currentColor" stroke="none" />
+                    <line x1="17.5" y1="6.5" x2="17.5" y2="6.5" strokeWidth="2.5" strokeLinecap="round" />
+                  </svg>
+                  <span className="connect-label">Instagram</span>
+                </a>
                 <a href="https://mail.google.com/mail/?view=cm&fs=1&to=hannankhan@gmail.com" target="_blank" rel="noopener noreferrer" className="connect-row">
                   <svg className="connect-icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -529,7 +538,7 @@ export default function Home() {
 
         <footer className="footer">
           <div className="section-container footer-content">
-            <p className="copyright">© 2026 Hannan Khan · Designed with love</p>
+            <p className="copyright">© 2026 Hannan Khan</p>
           </div>
         </footer>
       </div>
