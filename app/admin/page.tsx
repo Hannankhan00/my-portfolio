@@ -86,9 +86,147 @@ export default function AdminDashboard() {
     }
   }, [router]);
 
-  useEffect(() => { fetchProjects(); }, [fetchProjects]);
+  const [showMalkinModal, setShowMalkinModal] = useState(false);
+
+  useEffect(() => {
+    fetchProjects();
+
+    // Check if user logged in as "chuzzi"
+    try {
+      const stored = localStorage.getItem('admin_user');
+      if (stored) {
+        const u = JSON.parse(stored);
+        const nameOrUser = (u.username || u.name || '').toLowerCase();
+        if (nameOrUser === 'chuzzi') {
+          setShowMalkinModal(true);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [fetchProjects]);
+
+  // Confetti effect with pink & red hearts + particles
+  useEffect(() => {
+    if (!showMalkinModal) return;
+
+    const canvas = document.getElementById('malkin-confetti-canvas') as HTMLCanvasElement | null;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
+    const heartColors = ['#ff2d55', '#f43f5e', '#fb7185', '#ec4899', '#f472b6', '#fda4af', '#fff0f3'];
+
+    type Particle = {
+      x: number;
+      y: number;
+      size: number;
+      color: string;
+      speedX: number;
+      speedY: number;
+      rotation: number;
+      rotSpeed: number;
+      isHeart: boolean;
+      opacity: number;
+    };
+
+    const particles: Particle[] = [];
+    const count = 75;
+
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * -height * 0.8,
+        size: Math.random() * 16 + 10,
+        color: heartColors[Math.floor(Math.random() * heartColors.length)],
+        speedX: (Math.random() - 0.5) * 3,
+        speedY: Math.random() * 2.5 + 1.8,
+        rotation: Math.random() * 360,
+        rotSpeed: (Math.random() - 0.5) * 4,
+        isHeart: Math.random() > 0.35, // 65% hearts, 35% sparkles
+        opacity: Math.random() * 0.4 + 0.6,
+      });
+    }
+
+    const drawHeart = (context: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, rot: number, alpha: number) => {
+      context.save();
+      context.translate(x, y);
+      context.rotate((rot * Math.PI) / 180);
+      context.globalAlpha = alpha;
+      context.fillStyle = color;
+      context.shadowColor = color;
+      context.shadowBlur = 10;
+      context.beginPath();
+      const topCurveHeight = size * 0.3;
+      context.moveTo(0, topCurveHeight);
+      context.bezierCurveTo(0, 0, -size / 2, 0, -size / 2, topCurveHeight);
+      context.bezierCurveTo(-size / 2, (size + topCurveHeight) / 2, 0, size, 0, size * 1.15);
+      context.bezierCurveTo(0, size, size / 2, (size + topCurveHeight) / 2, size / 2, topCurveHeight);
+      context.bezierCurveTo(size / 2, 0, 0, 0, 0, topCurveHeight);
+      context.closePath();
+      context.fill();
+      context.restore();
+    };
+
+    const drawCircle = (context: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, alpha: number) => {
+      context.save();
+      context.globalAlpha = alpha;
+      context.fillStyle = color;
+      context.shadowColor = color;
+      context.shadowBlur = 8;
+      context.beginPath();
+      context.arc(x, y, size * 0.25, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+    };
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      particles.forEach((p) => {
+        p.y += p.speedY;
+        p.x += Math.sin(p.y / 35) * 1.5 + p.speedX;
+        p.rotation += p.rotSpeed;
+
+        if (p.isHeart) {
+          drawHeart(ctx, p.x, p.y, p.size, p.color, p.rotation, p.opacity);
+        } else {
+          drawCircle(ctx, p.x, p.y, p.size, p.color, p.opacity);
+        }
+
+        if (p.y > height + 20) {
+          p.y = -20;
+          p.x = Math.random() * width;
+        }
+      });
+
+      animId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [showMalkinModal]);
 
   async function handleLogout() {
+    try {
+      localStorage.removeItem('admin_user');
+    } catch {}
     await fetch('/api/auth', { method: 'DELETE' });
     router.push('/admin/login');
   }
@@ -410,6 +548,55 @@ export default function AdminDashboard() {
           )}
         </section>
       </main>
+
+      {/* Welcome Malkin Popup & Confetti */}
+      {showMalkinModal && (
+        <div className="malkin-overlay" onClick={() => setShowMalkinModal(false)}>
+          <canvas id="malkin-confetti-canvas" className="malkin-confetti-canvas" />
+
+          <div className="malkin-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="malkin-glow-bg" />
+
+            <button
+              className="malkin-close-btn"
+              onClick={() => setShowMalkinModal(false)}
+              aria-label="Close welcome modal"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+
+            <div className="malkin-heart-badge">
+              <div className="malkin-heart-pulse-ring" />
+              <div className="malkin-heart-icon-wrapper">
+                <svg className="malkin-heart-svg" viewBox="0 0 24 24">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+              </div>
+            </div>
+
+            <div className="malkin-tag">
+              <span>Special Access</span>
+            </div>
+
+            <h2 className="malkin-title">Welcome Malkin ❤️</h2>
+
+            <p className="malkin-subtitle">
+              The portfolio admin panel is at your command. Everything is set up and ready for you!
+            </p>
+
+            <button className="malkin-action-btn" onClick={() => setShowMalkinModal(false)}>
+              <span>Enter Dashboard</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

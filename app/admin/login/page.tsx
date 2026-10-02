@@ -30,6 +30,11 @@ export default function AdminLogin() {
         return;
       }
 
+      const data = await res.json();
+      if (typeof window !== 'undefined' && data.user) {
+        localStorage.setItem('admin_user', JSON.stringify(data.user));
+      }
+
       router.push('/admin');
     } catch {
       setError('Network error. Please try again.');
