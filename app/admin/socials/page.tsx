@@ -18,6 +18,7 @@ export type SocialLink = {
 const PLATFORMS = [
   { name: 'GitHub', icon: 'github' },
   { name: 'LinkedIn', icon: 'linkedin' },
+  { name: 'WhatsApp', icon: 'whatsapp' },
   { name: 'Instagram', icon: 'instagram' },
   { name: 'Email', icon: 'mail' },
   { name: 'X / Twitter', icon: 'twitter' },
@@ -30,6 +31,14 @@ const PLATFORMS = [
 export function getSocialIcon(iconOrPlatform: string) {
   const key = (iconOrPlatform || '').toLowerCase().trim();
 
+  if (key.includes('whats') || key.includes('wa')) {
+    return (
+      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+        <path d="M9.5 9c0 1.5 2 4.5 4.5 5l1.5-1.5" />
+      </svg>
+    );
+  }
   if (key.includes('git')) {
     return (
       <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" strokeLinecap="round" strokeLinejoin="round">

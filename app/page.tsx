@@ -62,12 +62,21 @@ type SocialItem = {
 const defaultSocials: SocialItem[] = [
   { id: 1, platform: 'GitHub', label: 'GitHub', url: 'https://github.com/Hannankhan00', icon: 'github' },
   { id: 2, platform: 'LinkedIn', label: 'LinkedIn', url: 'https://www.linkedin.com/in/hannankhan', icon: 'linkedin' },
-  { id: 3, platform: 'Instagram', label: 'Instagram', url: 'https://www.instagram.com/hannankhan', icon: 'instagram' },
-  { id: 4, platform: 'Email', label: 'hannankhan@gmail.com', url: 'https://mail.google.com/mail/?view=cm&fs=1&to=hannankhan@gmail.com', icon: 'mail' },
+  { id: 3, platform: 'WhatsApp', label: '+92 339 7197970', url: 'https://wa.me/923397197970', icon: 'whatsapp' },
+  { id: 4, platform: 'Instagram', label: 'Instagram', url: 'https://www.instagram.com/hannankhan', icon: 'instagram' },
+  { id: 5, platform: 'Email', label: 'hannankhan@gmail.com', url: 'https://mail.google.com/mail/?view=cm&fs=1&to=hannankhan@gmail.com', icon: 'mail' },
 ];
 
 function renderSocialIcon(iconOrPlatform: string) {
   const key = (iconOrPlatform || '').toLowerCase().trim();
+  if (key.includes('whats') || key.includes('wa')) {
+    return (
+      <svg className="connect-icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+        <path d="M9.5 9c0 1.5 2 4.5 4.5 5l1.5-1.5" />
+      </svg>
+    );
+  }
   if (key.includes('git')) {
     return (
       <svg className="connect-icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
