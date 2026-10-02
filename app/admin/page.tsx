@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import AdminSidebar from './components/AdminSidebar';
 import './admin.css';
 
 type Project = {
@@ -32,6 +33,16 @@ export default function AdminDashboard() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Edit Project state
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editForm, setEditForm] = useState(EMPTY_FORM);
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editUploading, setEditUploading] = useState(false);
+
+  // Drag & drop state
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -276,34 +287,139 @@ export default function AdminDashboard() {
     }
   }
 
+  // --- EDIT PROJECT HANDLERS ---
+  function openEditModal(proj: Project) {
+    setEditingProject(proj);
+    setEditForm({
+      title: proj.title,
+      description: proj.description,
+      stack: (proj.stack || []).join(', '),
+      image: proj.image || '',
+      link: proj.link,
+      reversed: Boolean(proj.reversed),
+    });
+  }
+
+  function closeEditModal() {
+    setEditingProject(null);
+    setEditForm(EMPTY_FORM);
+  }
+
+  async function handleEditImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setEditUploading(true);
+    const data = new FormData();
+    data.append('file', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: data,
+      });
+
+      if (res.status === 401) {
+        router.push('/admin/login');
+        return;
+      }
+
+      const json = await res.json();
+      if (!res.ok) {
+        showToast(json.error || 'Upload failed', 'error');
+        return;
+      }
+
+      setEditForm((prev) => ({ ...prev, image: json.url }));
+      showToast('Image uploaded!');
+    } catch {
+      showToast('Error uploading image', 'error');
+    } finally {
+      setEditUploading(false);
+      e.target.value = '';
+    }
+  }
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingProject) return;
+
+    setEditSubmitting(true);
+    try {
+      const payload = {
+        ...editForm,
+        stack: editForm.stack.split(',').map((s) => s.trim()).filter(Boolean),
+      };
+
+      const res = await fetch(`/api/projects/${editingProject.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.status === 401) { router.push('/admin/login'); return; }
+      if (!res.ok) {
+        const d = await res.json();
+        showToast(d.error ?? 'Failed to update project', 'error');
+        return;
+      }
+
+      showToast('Project updated successfully!');
+      closeEditModal();
+      fetchProjects();
+    } catch {
+      showToast('Network error updating project', 'error');
+    } finally {
+      setEditSubmitting(false);
+    }
+  }
+
+  // --- DRAG & DROP HANDLERS ---
+  const handleDragStart = (idx: number) => {
+    setDraggedIdx(idx);
+  };
+
+  const handleDragEnter = (idx: number) => {
+    setDragOverIdx(idx);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIdx(null);
+    setDragOverIdx(null);
+  };
+
+  const handleDrop = async (targetIdx: number) => {
+    if (draggedIdx === null || draggedIdx === targetIdx) {
+      handleDragEnd();
+      return;
+    }
+
+    const updated = [...projects];
+    const [movedItem] = updated.splice(draggedIdx, 1);
+    updated.splice(targetIdx, 0, movedItem);
+
+    setProjects(updated);
+    handleDragEnd();
+
+    try {
+      const order = updated.map((p) => p.id);
+      const res = await fetch('/api/projects/reorder', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order }),
+      });
+      if (!res.ok) throw new Error('Failed to save order');
+      showToast('Project order updated!');
+    } catch {
+      showToast('Failed to save project order', 'error');
+      fetchProjects();
+    }
+  };
+
   return (
     <div className="adm-root">
       {/* Sidebar */}
-      <aside className="adm-sidebar">
-        <div className="adm-sidebar-logo">
-          <img src="/assets/icon.png" alt="HK" className="adm-logo-img" />
-          <div>
-            <div className="adm-logo-name">Hannan Khan</div>
-            <div className="adm-logo-role">Portfolio Admin</div>
-          </div>
-        </div>
-
-        <nav className="adm-nav">
-          <a href="/" target="_blank" rel="noopener noreferrer" className="adm-nav-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            View Portfolio
-          </a>
-        </nav>
-
-        <button className="adm-logout" onClick={handleLogout}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Sign Out
-        </button>
-      </aside>
+      <AdminSidebar activePage="projects" />
 
       {/* Main */}
       <main className="adm-main">
@@ -493,61 +609,233 @@ export default function AdminDashboard() {
           ) : projects.length === 0 ? (
             <div className="adm-empty">No projects yet. Add one above!</div>
           ) : (
-            <div className="adm-project-list">
-              {projects.map((proj, idx) => (
-                <div key={proj.id} className="adm-project-row">
-                  <div className="adm-project-num">0{idx + 1}</div>
+            <>
+              <div className="adm-reorder-hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 15l5 5 5-5M7 9l5-5 5 5" />
+                </svg>
+                <span>Drag and drop cards using the grip handle to reorder how projects appear on your landing page.</span>
+              </div>
 
-                  {proj.image && (
-                    <img
-                      src={proj.image}
-                      alt={proj.title}
-                      className="adm-project-thumb"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
-                  )}
+              <div className="adm-project-list">
+                {projects.map((proj, idx) => (
+                  <div
+                    key={proj.id}
+                    className={`adm-project-row ${draggedIdx === idx ? 'dragging' : ''} ${dragOverIdx === idx ? 'drag-over' : ''}`}
+                    draggable
+                    onDragStart={() => handleDragStart(idx)}
+                    onDragEnter={() => handleDragEnter(idx)}
+                    onDragOver={(e) => { e.preventDefault(); }}
+                    onDragEnd={handleDragEnd}
+                    onDrop={() => handleDrop(idx)}
+                  >
+                    {/* Drag Handle */}
+                    <div className="adm-drag-handle" title="Drag to reorder" draggable={false}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="9" cy="5" r="1.5" fill="currentColor" />
+                        <circle cx="9" cy="12" r="1.5" fill="currentColor" />
+                        <circle cx="9" cy="19" r="1.5" fill="currentColor" />
+                        <circle cx="15" cy="5" r="1.5" fill="currentColor" />
+                        <circle cx="15" cy="12" r="1.5" fill="currentColor" />
+                        <circle cx="15" cy="19" r="1.5" fill="currentColor" />
+                      </svg>
+                    </div>
 
-                  <div className="adm-project-info">
-                    <h3 className="adm-project-title">{proj.title}</h3>
-                    <p className="adm-project-desc">{proj.description}</p>
+                    <div className="adm-project-num">0{idx + 1}</div>
 
-                    {proj.stack.length > 0 && (
-                      <div className="adm-project-stack">
-                        {proj.stack.map((tech) => (
-                          <span key={tech} className="adm-tag">{tech}</span>
-                        ))}
-                      </div>
+                    {proj.image && (
+                      <img
+                        src={proj.image}
+                        alt={proj.title}
+                        className="adm-project-thumb"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
                     )}
 
-                    <div className="adm-project-meta">
-                      <a href={proj.link} target="_blank" rel="noopener noreferrer" className="adm-project-link">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="14" height="14" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                    <div className="adm-project-info">
+                      <h3 className="adm-project-title">{proj.title}</h3>
+                      <p className="adm-project-desc">{proj.description}</p>
+
+                      {proj.stack.length > 0 && (
+                        <div className="adm-project-stack">
+                          {proj.stack.map((tech) => (
+                            <span key={tech} className="adm-tag">{tech}</span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="adm-project-meta">
+                        <a href={proj.link} target="_blank" rel="noopener noreferrer" className="adm-project-link">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="14" height="14" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                          </svg>
+                          {proj.link}
+                        </a>
+                        <span className="adm-badge">{proj.reversed ? 'Reversed' : 'Default'} layout</span>
+                      </div>
+                    </div>
+
+                    <div className="adm-row-actions">
+                      {/* Edit Button */}
+                      <button
+                        className="adm-edit-btn"
+                        onClick={() => openEditModal(proj)}
+                        title="Edit project"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                         </svg>
-                        {proj.link}
-                      </a>
-                      <span className="adm-badge">{proj.reversed ? 'Reversed' : 'Default'} layout</span>
+                      </button>
+
+                      {/* Delete Button */}
+                      <button
+                        className="adm-delete-btn"
+                        onClick={() => handleDelete(proj.id, proj.title)}
+                        disabled={deletingId === proj.id}
+                        title="Delete project"
+                      >
+                        {deletingId === proj.id ? <span className="adm-spinner" /> : (
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" />
+                          </svg>
+                        )}
+                      </button>
                     </div>
                   </div>
-
-                  <button
-                    className="adm-delete-btn"
-                    onClick={() => handleDelete(proj.id, proj.title)}
-                    disabled={deletingId === proj.id}
-                    title="Delete project"
-                  >
-                    {deletingId === proj.id ? <span className="adm-spinner" /> : (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </>
           )}
         </section>
       </main>
+
+      {/* Edit Project Modal */}
+      {editingProject && (
+        <div className="adm-modal-overlay" onClick={closeEditModal}>
+          <div className="adm-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modal-header">
+              <h2 className="adm-modal-title">Edit Project</h2>
+              <button type="button" className="adm-modal-close" onClick={closeEditModal} aria-label="Close">
+                ✕
+              </button>
+            </div>
+
+            <form className="adm-form" onSubmit={handleSaveEdit}>
+              <div className="adm-form-grid">
+                {/* Title */}
+                <div className="adm-field adm-field--full">
+                  <label className="adm-label">Project Title <span className="adm-required">*</span></label>
+                  <input
+                    type="text"
+                    className="adm-input"
+                    value={editForm.title}
+                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                    required
+                  />
+                </div>
+
+                {/* Description */}
+                <div className="adm-field adm-field--full">
+                  <label className="adm-label">Description <span className="adm-required">*</span></label>
+                  <textarea
+                    className="adm-input adm-textarea"
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                {/* Tech Stack */}
+                <div className="adm-field">
+                  <label className="adm-label">Tech Stack (comma-separated)</label>
+                  <input
+                    type="text"
+                    className="adm-input"
+                    placeholder="Next.js, TypeScript, Tailwind"
+                    value={editForm.stack}
+                    onChange={(e) => setEditForm({ ...editForm, stack: e.target.value })}
+                  />
+                </div>
+
+                {/* Project Link */}
+                <div className="adm-field">
+                  <label className="adm-label">Live Link / URL <span className="adm-required">*</span></label>
+                  <input
+                    type="url"
+                    className="adm-input"
+                    placeholder="https://..."
+                    value={editForm.link}
+                    onChange={(e) => setEditForm({ ...editForm, link: e.target.value })}
+                    required
+                  />
+                </div>
+
+                {/* Image */}
+                <div className="adm-field adm-field--full">
+                  <label className="adm-label">Project Image URL</label>
+                  <div className="adm-upload-row">
+                    <input
+                      type="text"
+                      className="adm-input"
+                      placeholder="https://... or upload from your computer"
+                      value={editForm.image}
+                      onChange={(e) => setEditForm({ ...editForm, image: e.target.value })}
+                    />
+                    <label className="adm-upload-btn">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleEditImageUpload}
+                        disabled={editUploading}
+                        style={{ display: 'none' }}
+                      />
+                      {editUploading ? <span className="adm-spinner" /> : (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                      )}
+                      {editUploading ? 'Uploading…' : 'Upload File'}
+                    </label>
+                  </div>
+                  {editForm.image && (
+                    <div className="adm-img-preview">
+                      <img src={editForm.image} alt="Preview" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Reversed layout toggle */}
+                <div className="adm-field adm-field--full">
+                  <label className="adm-toggle">
+                    <input
+                      type="checkbox"
+                      className="adm-toggle-input"
+                      checked={editForm.reversed}
+                      onChange={(e) => setEditForm({ ...editForm, reversed: e.target.checked })}
+                    />
+                    <span className="adm-toggle-track" />
+                    <span className="adm-toggle-label">Reversed visual layout (image right, text left on desktop)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="adm-form-actions">
+                <button type="button" className="adm-btn adm-btn--ghost" onClick={closeEditModal}>
+                  Cancel
+                </button>
+                <button type="submit" className="adm-btn adm-btn--primary" disabled={editSubmitting}>
+                  {editSubmitting ? <span className="adm-spinner" /> : null}
+                  {editSubmitting ? 'Saving…' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Welcome Malkin Popup & Confetti */}
       {showMalkinModal && (

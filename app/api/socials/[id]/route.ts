@@ -22,41 +22,37 @@ export async function PUT(
   const numericId = parseInt(id, 10);
 
   if (isNaN(numericId)) {
-    return Response.json({ error: 'Invalid project ID' }, { status: 400 });
+    return Response.json({ error: 'Invalid social ID' }, { status: 400 });
   }
 
   const body = await request.json();
-  const { title, description, stack, image, link, reversed } = body;
+  const { platform, label, url, icon } = body;
 
-  if (!title || !description || !link) {
+  if (!platform || !url) {
     return Response.json(
-      { error: 'title, description and link are required' },
+      { error: 'Platform and URL are required' },
       { status: 400 }
     );
   }
 
-  const stackArr: string[] = Array.isArray(stack) ? stack.map(String) : [];
-  const imageStr = String(image ?? '').trim();
-  const linkStr = String(link).trim();
-  const titleStr = String(title).trim();
-  const descStr = String(description).trim();
-  const reversedBool = Boolean(reversed);
+  const platformStr = String(platform).trim();
+  const labelStr = String(label || platform).trim();
+  const urlStr = String(url).trim();
+  const iconStr = String(icon ?? '').trim();
 
   const rows = await sql`
-    UPDATE projects
+    UPDATE socials
     SET
-      title = ${titleStr},
-      description = ${descStr},
-      stack = ${stackArr},
-      image = ${imageStr},
-      link = ${linkStr},
-      reversed = ${reversedBool}
+      platform = ${platformStr},
+      label = ${labelStr},
+      url = ${urlStr},
+      icon = ${iconStr}
     WHERE id = ${numericId}
-    RETURNING id, title, description, stack, image, link, reversed, COALESCE(position, 0) as position, created_at
+    RETURNING id, platform, label, url, icon, position, created_at
   `;
 
   if (!rows || rows.length === 0) {
-    return Response.json({ error: 'Project not found' }, { status: 404 });
+    return Response.json({ error: 'Social link not found' }, { status: 404 });
   }
 
   return Response.json(rows[0]);
@@ -74,15 +70,15 @@ export async function DELETE(
   const numericId = parseInt(id, 10);
 
   if (isNaN(numericId)) {
-    return Response.json({ error: 'Invalid project ID' }, { status: 400 });
+    return Response.json({ error: 'Invalid social ID' }, { status: 400 });
   }
 
   const rows = await sql`
-    DELETE FROM projects WHERE id = ${numericId} RETURNING id
+    DELETE FROM socials WHERE id = ${numericId} RETURNING id
   `;
 
   if (!rows || rows.length === 0) {
-    return Response.json({ error: 'Project not found' }, { status: 404 });
+    return Response.json({ error: 'Social link not found' }, { status: 404 });
   }
 
   return Response.json({ success: true });

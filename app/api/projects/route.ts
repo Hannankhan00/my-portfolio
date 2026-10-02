@@ -18,14 +18,15 @@ export type ProjectRow = {
   image: string;
   link: string;
   reversed: boolean;
+  position: number;
   created_at: string;
 };
 
 export async function GET() {
   const rows = (await sql`
-    SELECT id, title, description, stack, image, link, reversed, created_at
+    SELECT id, title, description, stack, image, link, reversed, COALESCE(position, 0) as position, created_at
     FROM projects
-    ORDER BY created_at ASC
+    ORDER BY position ASC, id ASC
   `) as ProjectRow[];
   return Response.json(rows);
 }
@@ -52,10 +53,16 @@ export async function POST(request: NextRequest) {
   const descStr = String(description).trim();
   const reversedBool = Boolean(reversed);
 
+  // Compute next position
+  const maxPosRow = (await sql`
+    SELECT COALESCE(MAX(position), 0) + 1 AS next_pos FROM projects
+  `) as Array<{ next_pos: number }>;
+  const nextPos = maxPosRow[0]?.next_pos ?? 1;
+
   const rows = (await sql`
-    INSERT INTO projects (title, description, stack, image, link, reversed)
-    VALUES (${titleStr}, ${descStr}, ${stackArr}, ${imageStr}, ${linkStr}, ${reversedBool})
-    RETURNING id, title, description, stack, image, link, reversed, created_at
+    INSERT INTO projects (title, description, stack, image, link, reversed, position)
+    VALUES (${titleStr}, ${descStr}, ${stackArr}, ${imageStr}, ${linkStr}, ${reversedBool}, ${nextPos})
+    RETURNING id, title, description, stack, image, link, reversed, position, created_at
   `) as ProjectRow[];
 
   return Response.json(rows[0], { status: 201 });
