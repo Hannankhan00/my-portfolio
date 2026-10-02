@@ -12,6 +12,12 @@
 /* ---- SIDEBAR ---- */
 .adm-sidebar {
   width: 260px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  height: 100vh;
+  height: 100dvh;
   flex-shrink: 0;
   background: linear-gradient(
     180deg,
@@ -24,10 +30,6 @@
   display: flex;
   flex-direction: column;
   padding: 2rem 1.25rem;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100dvh;
   overflow-y: auto;
   z-index: 50;
 }
@@ -127,6 +129,7 @@
 /* ---- MAIN ---- */
 .adm-main {
   flex: 1;
+  margin-left: 260px;
   min-width: 0;
   padding: 2.5rem 2.5rem 4rem;
   display: flex;
@@ -825,5 +828,31 @@
 
 .malkin-action-btn:active {
   transform: translateY(0);
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 768px) {
+  .adm-root {
+    flex-direction: column;
+  }
+
+  .adm-sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1.25rem;
+  }
+
+  .adm-sidebar-logo {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .adm-main {
+    margin-left: 0;
+    padding: 1.5rem 1rem 3rem;
+  }
 }
 
