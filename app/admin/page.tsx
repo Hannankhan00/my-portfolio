@@ -34,6 +34,9 @@ export default function AdminDashboard() {
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Add Project modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+
   // Edit Project state
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [editForm, setEditForm] = useState(EMPTY_FORM);
@@ -263,6 +266,7 @@ export default function AdminDashboard() {
       }
       showToast('Project added successfully!');
       setForm(EMPTY_FORM);
+      setShowAddModal(false);
       fetchProjects();
     } catch {
       showToast('Network error', 'error');
@@ -436,163 +440,18 @@ export default function AdminDashboard() {
             <h1 className="adm-page-title">Projects</h1>
             <p className="adm-page-sub">{projects.length} project{projects.length !== 1 ? 's' : ''} in portfolio</p>
           </div>
+          <button
+            type="button"
+            className="adm-btn adm-btn--primary"
+            onClick={() => setShowAddModal(true)}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add Project
+          </button>
         </header>
-
-        {/* Add Project Form */}
-        <section className="adm-card">
-          <h2 className="adm-card-title">
-            <span className="adm-card-title-dot" />
-            Add New Project
-          </h2>
-
-          <form className="adm-form" onSubmit={handleAdd}>
-            <div className="adm-form-grid">
-              {/* Title */}
-              <div className="adm-field adm-field--full">
-                <label htmlFor="proj-title" className="adm-label">Project Title <span className="adm-required">*</span></label>
-                <input
-                  id="proj-title"
-                  type="text"
-                  className="adm-input"
-                  placeholder="e.g. My Awesome App"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  required
-                />
-              </div>
-
-              {/* Description */}
-              <div className="adm-field adm-field--full">
-                <label htmlFor="proj-desc" className="adm-label">Description <span className="adm-required">*</span></label>
-                <textarea
-                  id="proj-desc"
-                  className="adm-input adm-textarea"
-                  placeholder="Describe what this project does, the problem it solves, or key features..."
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  rows={4}
-                  required
-                />
-              </div>
-
-              {/* Stack */}
-              <div className="adm-field">
-                <label htmlFor="proj-stack" className="adm-label">Tech Stack</label>
-                <input
-                  id="proj-stack"
-                  type="text"
-                  className="adm-input"
-                  placeholder="Next.js, TypeScript, MySQL (comma-separated)"
-                  value={form.stack}
-                  onChange={(e) => setForm({ ...form, stack: e.target.value })}
-                />
-                <span className="adm-hint">Separate each technology with a comma</span>
-              </div>
-
-              {/* Image path and Cloudinary Upload */}
-              <div className="adm-field">
-                <label className="adm-label">Project Image</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <input
-                      id="proj-image"
-                      type="text"
-                      className="adm-input"
-                      placeholder="Paste image URL or upload to Cloudinary"
-                      value={form.image}
-                      onChange={(e) => setForm({ ...form, image: e.target.value })}
-                    />
-                    <label
-                      htmlFor="proj-upload"
-                      className="adm-btn adm-btn--ghost"
-                      style={{
-                        cursor: uploading ? 'not-allowed' : 'pointer',
-                        whiteSpace: 'nowrap',
-                        margin: 0,
-                        padding: '0.65rem 1rem',
-                        fontSize: '0.8rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.4rem',
-                      }}
-                    >
-                      {uploading ? <span className="adm-spinner" /> : (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="17 8 12 3 7 8" />
-                          <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
-                      )}
-                      {uploading ? 'Uploading...' : 'Cloudinary Upload'}
-                    </label>
-                    <input
-                      id="proj-upload"
-                      type="file"
-                      accept="image/*"
-                      style={{ display: 'none' }}
-                      disabled={uploading}
-                      onChange={handleImageUpload}
-                    />
-                  </div>
-                  {form.image && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem' }}>
-                      <img
-                        src={form.image}
-                        alt="Preview"
-                        style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)' }}
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                      />
-                      <span className="adm-hint" style={{ color: '#c084fc' }}>✓ Image attached</span>
-                    </div>
-                  )}
-                  <span className="adm-hint">Upload directly to Cloudinary or supply an image link</span>
-                </div>
-              </div>
-
-              {/* Link */}
-              <div className="adm-field">
-                <label htmlFor="proj-link" className="adm-label">Live URL <span className="adm-required">*</span></label>
-                <input
-                  id="proj-link"
-                  type="url"
-                  className="adm-input"
-                  placeholder="https://myproject.com"
-                  value={form.link}
-                  onChange={(e) => setForm({ ...form, link: e.target.value })}
-                  required
-                />
-              </div>
-
-              {/* Reversed layout */}
-              <div className="adm-field adm-field--toggle">
-                <label className="adm-label">Layout</label>
-                <label className="adm-toggle" htmlFor="proj-reversed">
-                  <input
-                    id="proj-reversed"
-                    type="checkbox"
-                    className="adm-toggle-input"
-                    checked={form.reversed}
-                    onChange={(e) => setForm({ ...form, reversed: e.target.checked })}
-                  />
-                  <span className="adm-toggle-track" />
-                  <span className="adm-toggle-label">
-                    {form.reversed ? 'Image on right (reversed)' : 'Image on left (default)'}
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <div className="adm-form-actions">
-              <button type="button" className="adm-btn adm-btn--ghost" onClick={() => setForm(EMPTY_FORM)}>
-                Clear
-              </button>
-              <button type="submit" className="adm-btn adm-btn--primary" disabled={submitting}>
-                {submitting ? <span className="adm-spinner" /> : null}
-                {submitting ? 'Adding…' : '+ Add Project'}
-              </button>
-            </div>
-          </form>
-        </section>
 
         {/* Projects list */}
         <section className="adm-card">
@@ -607,7 +466,16 @@ export default function AdminDashboard() {
               <span>Loading projects…</span>
             </div>
           ) : projects.length === 0 ? (
-            <div className="adm-empty">No projects yet. Add one above!</div>
+            <div className="adm-empty" style={{ flexDirection: 'column', gap: '1rem', padding: '3.5rem 0' }}>
+              <p>No projects yet. Click below to add your first project!</p>
+              <button
+                type="button"
+                className="adm-btn adm-btn--primary"
+                onClick={() => setShowAddModal(true)}
+              >
+                + Add Project
+              </button>
+            </div>
           ) : (
             <>
               <div className="adm-reorder-hint">
@@ -709,6 +577,176 @@ export default function AdminDashboard() {
           )}
         </section>
       </main>
+
+      {/* Add Project Modal */}
+      {showAddModal && (
+        <div className="adm-modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="adm-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modal-header">
+              <h2 className="adm-modal-title">Add New Project</h2>
+              <button
+                type="button"
+                className="adm-modal-close"
+                onClick={() => setShowAddModal(false)}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form className="adm-form" onSubmit={handleAdd}>
+              <div className="adm-form-grid">
+                {/* Title */}
+                <div className="adm-field adm-field--full">
+                  <label htmlFor="proj-title" className="adm-label">Project Title <span className="adm-required">*</span></label>
+                  <input
+                    id="proj-title"
+                    type="text"
+                    className="adm-input"
+                    placeholder="e.g. My Awesome App"
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    required
+                  />
+                </div>
+
+                {/* Description */}
+                <div className="adm-field adm-field--full">
+                  <label htmlFor="proj-desc" className="adm-label">Description <span className="adm-required">*</span></label>
+                  <textarea
+                    id="proj-desc"
+                    className="adm-input adm-textarea"
+                    placeholder="Describe what this project does, the problem it solves, or key features..."
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                {/* Stack */}
+                <div className="adm-field">
+                  <label htmlFor="proj-stack" className="adm-label">Tech Stack</label>
+                  <input
+                    id="proj-stack"
+                    type="text"
+                    className="adm-input"
+                    placeholder="Next.js, TypeScript, MySQL (comma-separated)"
+                    value={form.stack}
+                    onChange={(e) => setForm({ ...form, stack: e.target.value })}
+                  />
+                  <span className="adm-hint">Separate each technology with a comma</span>
+                </div>
+
+                {/* Link */}
+                <div className="adm-field">
+                  <label htmlFor="proj-link" className="adm-label">Live URL <span className="adm-required">*</span></label>
+                  <input
+                    id="proj-link"
+                    type="url"
+                    className="adm-input"
+                    placeholder="https://myproject.com"
+                    value={form.link}
+                    onChange={(e) => setForm({ ...form, link: e.target.value })}
+                    required
+                  />
+                </div>
+
+                {/* Image path and Cloudinary Upload */}
+                <div className="adm-field adm-field--full">
+                  <label className="adm-label">Project Image</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <input
+                        id="proj-image"
+                        type="text"
+                        className="adm-input"
+                        placeholder="Paste image URL or upload to Cloudinary"
+                        value={form.image}
+                        onChange={(e) => setForm({ ...form, image: e.target.value })}
+                      />
+                      <label
+                        htmlFor="proj-upload"
+                        className="adm-btn adm-btn--ghost"
+                        style={{
+                          cursor: uploading ? 'not-allowed' : 'pointer',
+                          whiteSpace: 'nowrap',
+                          margin: 0,
+                          padding: '0.65rem 1rem',
+                          fontSize: '0.8rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                        }}
+                      >
+                        {uploading ? <span className="adm-spinner" /> : (
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                          </svg>
+                        )}
+                        {uploading ? 'Uploading...' : 'Cloudinary Upload'}
+                      </label>
+                      <input
+                        id="proj-upload"
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        disabled={uploading}
+                        onChange={handleImageUpload}
+                      />
+                    </div>
+                    {form.image && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem' }}>
+                        <img
+                          src={form.image}
+                          alt="Preview"
+                          style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)' }}
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                        <span className="adm-hint" style={{ color: '#c084fc' }}>✓ Image attached</span>
+                      </div>
+                    )}
+                    <span className="adm-hint">Upload directly to Cloudinary or supply an image link</span>
+                  </div>
+                </div>
+
+                {/* Reversed layout */}
+                <div className="adm-field adm-field--full">
+                  <label className="adm-toggle" htmlFor="proj-reversed">
+                    <input
+                      id="proj-reversed"
+                      type="checkbox"
+                      className="adm-toggle-input"
+                      checked={form.reversed}
+                      onChange={(e) => setForm({ ...form, reversed: e.target.checked })}
+                    />
+                    <span className="adm-toggle-track" />
+                    <span className="adm-toggle-label">
+                      {form.reversed ? 'Image on right (reversed on desktop)' : 'Image on left (default on desktop)'}
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="adm-form-actions">
+                <button
+                  type="button"
+                  className="adm-btn adm-btn--ghost"
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="adm-btn adm-btn--primary" disabled={submitting}>
+                  {submitting ? <span className="adm-spinner" /> : null}
+                  {submitting ? 'Adding…' : '+ Add Project'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Edit Project Modal */}
       {editingProject && (

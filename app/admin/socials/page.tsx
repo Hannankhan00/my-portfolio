@@ -122,6 +122,9 @@ export default function SocialsAdminPage() {
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Add Social modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+
   // Edit State
   const [editingSocial, setEditingSocial] = useState<SocialLink | null>(null);
   const [editForm, setEditForm] = useState(EMPTY_SOCIAL_FORM);
@@ -195,6 +198,7 @@ export default function SocialsAdminPage() {
 
       showToast('Social link added successfully!');
       setForm(EMPTY_SOCIAL_FORM);
+      setShowAddModal(false);
       fetchSocials();
     } catch {
       showToast('Network error', 'error');
@@ -327,76 +331,18 @@ export default function SocialsAdminPage() {
               Manage the social profile links shown in your portfolio&apos;s &ldquo;Let&apos;s Connect&rdquo; section
             </p>
           </div>
+          <button
+            type="button"
+            className="adm-btn adm-btn--primary"
+            onClick={() => setShowAddModal(true)}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add Social Link
+          </button>
         </header>
-
-        {/* Add Social Link Form */}
-        <section className="adm-card">
-          <h2 className="adm-card-title">
-            <span className="adm-card-title-dot" />
-            Add New Social Account
-          </h2>
-
-          <form className="adm-form" onSubmit={handleAdd}>
-            <div className="adm-form-grid">
-              {/* Platform Preset */}
-              <div className="adm-field">
-                <label className="adm-label">Platform <span className="adm-required">*</span></label>
-                <select
-                  className="adm-input adm-select"
-                  value={form.platform}
-                  onChange={(e) => handlePlatformChange(e.target.value)}
-                  required
-                >
-                  {PLATFORMS.map((p) => (
-                    <option key={p.name} value={p.name}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Display Label */}
-              <div className="adm-field">
-                <label className="adm-label">Display Label <span className="adm-required">*</span></label>
-                <input
-                  type="text"
-                  className="adm-input"
-                  placeholder="e.g. GitHub or hannankhan@gmail.com"
-                  value={form.label}
-                  onChange={(e) => setForm({ ...form, label: e.target.value })}
-                  required
-                />
-              </div>
-
-              {/* URL */}
-              <div className="adm-field adm-field--full">
-                <label className="adm-label">Link URL <span className="adm-required">*</span></label>
-                <input
-                  type="text"
-                  className="adm-input"
-                  placeholder="https://github.com/username or mailto:you@gmail.com"
-                  value={form.url}
-                  onChange={(e) => setForm({ ...form, url: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="adm-form-actions">
-              <button
-                type="button"
-                className="adm-btn adm-btn--ghost"
-                onClick={() => setForm(EMPTY_SOCIAL_FORM)}
-              >
-                Clear
-              </button>
-              <button type="submit" className="adm-btn adm-btn--primary" disabled={submitting}>
-                {submitting ? <span className="adm-spinner" /> : null}
-                {submitting ? 'Adding…' : '+ Add Social Link'}
-              </button>
-            </div>
-          </form>
-        </section>
 
         {/* Current Social Links */}
         <section className="adm-card">
@@ -411,7 +357,16 @@ export default function SocialsAdminPage() {
               <span>Loading social links…</span>
             </div>
           ) : socials.length === 0 ? (
-            <div className="adm-empty">No social links yet. Add one above!</div>
+            <div className="adm-empty" style={{ flexDirection: 'column', gap: '1rem', padding: '3.5rem 0' }}>
+              <p>No social links yet. Add your accounts!</p>
+              <button
+                type="button"
+                className="adm-btn adm-btn--primary"
+                onClick={() => setShowAddModal(true)}
+              >
+                + Add Social Link
+              </button>
+            </div>
           ) : (
             <>
               <div className="adm-reorder-hint">
@@ -501,6 +456,86 @@ export default function SocialsAdminPage() {
           )}
         </section>
       </main>
+
+      {/* Add Social Link Modal */}
+      {showAddModal && (
+        <div className="adm-modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="adm-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modal-header">
+              <h2 className="adm-modal-title">Add New Social Link</h2>
+              <button
+                type="button"
+                className="adm-modal-close"
+                onClick={() => setShowAddModal(false)}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form className="adm-form" onSubmit={handleAdd}>
+              <div className="adm-form-grid">
+                {/* Platform Preset */}
+                <div className="adm-field">
+                  <label className="adm-label">Platform <span className="adm-required">*</span></label>
+                  <select
+                    className="adm-input adm-select"
+                    value={form.platform}
+                    onChange={(e) => handlePlatformChange(e.target.value)}
+                    required
+                  >
+                    {PLATFORMS.map((p) => (
+                      <option key={p.name} value={p.name}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Display Label */}
+                <div className="adm-field">
+                  <label className="adm-label">Display Label <span className="adm-required">*</span></label>
+                  <input
+                    type="text"
+                    className="adm-input"
+                    placeholder="e.g. GitHub or hannankhan@gmail.com"
+                    value={form.label}
+                    onChange={(e) => setForm({ ...form, label: e.target.value })}
+                    required
+                  />
+                </div>
+
+                {/* URL */}
+                <div className="adm-field adm-field--full">
+                  <label className="adm-label">Link URL <span className="adm-required">*</span></label>
+                  <input
+                    type="text"
+                    className="adm-input"
+                    placeholder="https://github.com/username or mailto:you@gmail.com"
+                    value={form.url}
+                    onChange={(e) => setForm({ ...form, url: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="adm-form-actions">
+                <button
+                  type="button"
+                  className="adm-btn adm-btn--ghost"
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="adm-btn adm-btn--primary" disabled={submitting}>
+                  {submitting ? <span className="adm-spinner" /> : null}
+                  {submitting ? 'Adding…' : '+ Add Social Link'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Edit Social Modal */}
       {editingSocial && (
