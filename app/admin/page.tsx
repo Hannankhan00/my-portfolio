@@ -28,9 +28,45 @@ export default function AdminDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [loading, setLoading] = useState(true);
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const data = new FormData();
+    data.append('file', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: data,
+      });
+
+      if (res.status === 401) {
+        router.push('/admin/login');
+        return;
+      }
+
+      const json = await res.json();
+      if (!res.ok) {
+        showToast(json.error || 'Upload failed', 'error');
+        return;
+      }
+
+      setForm((prev) => ({ ...prev, image: json.url }));
+      showToast('Image uploaded to Cloudinary!');
+    } catch {
+      showToast('Error uploading image', 'error');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  }
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
     setToast({ msg, type });
@@ -199,18 +235,64 @@ export default function AdminDashboard() {
                 <span className="adm-hint">Separate each technology with a comma</span>
               </div>
 
-              {/* Image path */}
+              {/* Image path and Cloudinary Upload */}
               <div className="adm-field">
-                <label htmlFor="proj-image" className="adm-label">Image Path</label>
-                <input
-                  id="proj-image"
-                  type="text"
-                  className="adm-input"
-                  placeholder="/assets/my-project.png"
-                  value={form.image}
-                  onChange={(e) => setForm({ ...form, image: e.target.value })}
-                />
-                <span className="adm-hint">Upload file to /public/assets/ first</span>
+                <label className="adm-label">Project Image</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input
+                      id="proj-image"
+                      type="text"
+                      className="adm-input"
+                      placeholder="Paste image URL or upload to Cloudinary"
+                      value={form.image}
+                      onChange={(e) => setForm({ ...form, image: e.target.value })}
+                    />
+                    <label
+                      htmlFor="proj-upload"
+                      className="adm-btn adm-btn--ghost"
+                      style={{
+                        cursor: uploading ? 'not-allowed' : 'pointer',
+                        whiteSpace: 'nowrap',
+                        margin: 0,
+                        padding: '0.65rem 1rem',
+                        fontSize: '0.8rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                      }}
+                    >
+                      {uploading ? <span className="adm-spinner" /> : (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                      )}
+                      {uploading ? 'Uploading...' : 'Cloudinary Upload'}
+                    </label>
+                    <input
+                      id="proj-upload"
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      disabled={uploading}
+                      onChange={handleImageUpload}
+                    />
+                  </div>
+                  {form.image && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem' }}>
+                      <img
+                        src={form.image}
+                        alt="Preview"
+                        style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)' }}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                      <span className="adm-hint" style={{ color: '#c084fc' }}>✓ Image attached</span>
+                    </div>
+                  )}
+                  <span className="adm-hint">Upload directly to Cloudinary or supply an image link</span>
+                </div>
               </div>
 
               {/* Link */}
