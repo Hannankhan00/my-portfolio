@@ -7,6 +7,7 @@ import DarkVeil from './components/DarkVeil';
 import Header from './components/Header';
 import ClickSpark from './components/ClickSpark';
 import ProfileCard from './components/ProfileCard';
+import initialProjects from '@/data/projects.json';
 
 const skillsData = [
   {
@@ -41,7 +42,7 @@ const skillsData = [
 ];
 
 type Project = {
-  id: number;
+  id: number | string;
   title: string;
   description: string;
   stack: string[];
@@ -51,13 +52,22 @@ type Project = {
 };
 
 export default function Home() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>(initialProjects as Project[]);
 
   useEffect(() => {
     fetch('/api/projects')
-      .then((r) => r.json())
-      .then((data: Project[]) => setProjects(data))
-      .catch(() => {/* silently fall back to empty list */});
+      .then((r) => {
+        if (!r.ok) throw new Error('Failed to fetch projects');
+        return r.json();
+      })
+      .then((data: Project[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setProjects(data);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load projects from API, using fallback data:', err);
+      });
   }, []);
 
   useEffect(() => {
@@ -197,78 +207,6 @@ export default function Home() {
           }
         );
 
-        // Selected Work Pinned Scroll Animation (Desktop Only)
-        const showcase = document.querySelector('.projects-showcase');
-        const projectRows = gsap.utils.toArray('.project-row') as HTMLElement[];
-
-        if (showcase && projectRows.length > 0) {
-          const mm = gsap.matchMedia();
-
-          mm.add("(min-width: 901px)", () => {
-            const pinTl = gsap.timeline({
-              scrollTrigger: {
-                trigger: '#projects',
-                pin: true,
-                scrub: 1,
-                start: 'top top',
-                end: () => '+=' + (window.innerHeight * projectRows.length),
-              }
-            });
-
-            projectRows.forEach((row, i) => {
-              const isReversed = row.classList.contains('reversed');
-              const visual = row.querySelector('.project-visual');
-              const content = row.querySelector('.project-content');
-              
-              // Set initial state for all rows
-              gsap.set(row, { opacity: 0, visibility: 'hidden', pointerEvents: 'none' });
-              
-              if (i === 0) {
-                // First row is visible immediately
-                gsap.set(row, { opacity: 1, visibility: 'visible', pointerEvents: 'auto' });
-                gsap.set(visual, { opacity: 1, scale: 1, y: 0 });
-                gsap.set(content, { opacity: 1, x: 0 });
-              } else {
-                // Animate IN subsequent rows
-                pinTl.to(row, { autoAlpha: 1, pointerEvents: 'auto', duration: 0.1 }, "+=0.2");
-                pinTl.fromTo(visual, 
-                  { opacity: 0, scale: 0.9, y: 80 }, 
-                  { opacity: 1, scale: 1, y: 0, duration: 1, ease: 'power2.out' }, 
-                  "<"
-                );
-                pinTl.fromTo(content, 
-                  { opacity: 0, x: isReversed ? -80 : 80 }, 
-                  { opacity: 1, x: 0, duration: 1, ease: 'power2.out' }, 
-                  "<0.2"
-                );
-              }
-
-              // Animate OUT all rows except the last one
-              if (i !== projectRows.length - 1) {
-                pinTl.to(visual, { opacity: 0, scale: 0.95, y: -40, duration: 0.8, ease: 'power2.in' }, "+=1");
-                pinTl.to(content, { opacity: 0, y: -20, duration: 0.8, ease: 'power2.in' }, "<");
-                pinTl.set(row, { pointerEvents: 'none', visibility: 'hidden' });
-              }
-            });
-            
-            return () => {
-              gsap.set(projectRows, { clearProps: "all" });
-            };
-          });
-
-          // Mobile Standard Scroll
-          mm.add("(max-width: 900px)", () => {
-            projectRows.forEach(row => {
-              gsap.fromTo(row,
-                { opacity: 0, y: 40 },
-                { opacity: 1, y: 0, duration: 1, ease: 'power3.out', scrollTrigger: getScrollTrigger(row) }
-              );
-            });
-            return () => {
-              gsap.set(projectRows, { clearProps: "all" });
-            };
-          });
-        }
 
         // Connect Section
         gsap.fromTo('.connect-section .section-title, .connect-text',
@@ -308,6 +246,115 @@ export default function Home() {
       ctx.revert();
     };
   }, []);
+
+  // Dedicated effect for Projects GSAP animation (reacts when projects change)
+  useEffect(() => {
+    if (!projects || projects.length === 0) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      const showcase = document.querySelector('.projects-showcase');
+      const projectRows = gsap.utils.toArray('.project-row') as HTMLElement[];
+
+      if (!showcase || projectRows.length === 0) return;
+
+      const mm = gsap.matchMedia();
+
+      // Desktop Pinned Scroll Animation
+      mm.add("(min-width: 901px)", () => {
+        const pinTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: '#projects',
+            pin: true,
+            scrub: 1,
+            start: 'top top',
+            end: () => '+=' + (window.innerHeight * projectRows.length),
+          }
+        });
+
+        projectRows.forEach((row, i) => {
+          const isReversed = row.classList.contains('reversed');
+          const visual = row.querySelector('.project-visual');
+          const content = row.querySelector('.project-content');
+
+          // Set initial state for all rows
+          gsap.set(row, { opacity: 0, visibility: 'hidden', pointerEvents: 'none' });
+
+          if (i === 0) {
+            // First row is visible immediately
+            gsap.set(row, { opacity: 1, visibility: 'visible', pointerEvents: 'auto' });
+            if (visual) gsap.set(visual, { opacity: 1, scale: 1, y: 0 });
+            if (content) gsap.set(content, { opacity: 1, x: 0 });
+          } else {
+            // Animate IN subsequent rows
+            pinTl.to(row, { autoAlpha: 1, pointerEvents: 'auto', duration: 0.1 }, "+=0.2");
+            if (visual) {
+              pinTl.fromTo(visual,
+                { opacity: 0, scale: 0.9, y: 80 },
+                { opacity: 1, scale: 1, y: 0, duration: 1, ease: 'power2.out' },
+                "<"
+              );
+            }
+            if (content) {
+              pinTl.fromTo(content,
+                { opacity: 0, x: isReversed ? -80 : 80 },
+                { opacity: 1, x: 0, duration: 1, ease: 'power2.out' },
+                "<0.2"
+              );
+            }
+          }
+
+          // Animate OUT all rows except the last one
+          if (i !== projectRows.length - 1) {
+            if (visual) {
+              pinTl.to(visual, { opacity: 0, scale: 0.95, y: -40, duration: 0.8, ease: 'power2.in' }, "+=1");
+            }
+            if (content) {
+              pinTl.to(content, { opacity: 0, y: -20, duration: 0.8, ease: 'power2.in' }, "<");
+            }
+            pinTl.set(row, { pointerEvents: 'none', visibility: 'hidden' });
+          }
+        });
+
+        return () => {
+          gsap.set(projectRows, { clearProps: "all" });
+        };
+      });
+
+      // Mobile Standard Scroll Animation
+      mm.add("(max-width: 900px)", () => {
+        projectRows.forEach(row => {
+          gsap.fromTo(row,
+            { opacity: 0, y: 40 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 1,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: row,
+                start: 'top 85%',
+                toggleActions: 'play none none reverse'
+              }
+            }
+          );
+        });
+        return () => {
+          gsap.set(projectRows, { clearProps: "all" });
+        };
+      });
+    });
+
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 200);
+
+    return () => {
+      clearTimeout(refreshTimer);
+      ctx.revert();
+    };
+  }, [projects]);
 
   return (
     <ClickSpark
@@ -454,7 +501,7 @@ export default function Home() {
               <h2 className="section-title">Selected Work</h2>
               <div className="projects-showcase">
                 {projects.map((project, index) => (
-                  <article key={index} className={`project-row ${project.reversed ? 'reversed' : ''}`}>
+                  <article key={project.id ?? index} className={`project-row ${project.reversed ? 'reversed' : ''}`}>
                     <div className="project-visual">
                       <img src={project.image} alt={project.title} loading="lazy" />
                     </div>
@@ -463,7 +510,7 @@ export default function Home() {
                       <h3 className="project-name">{project.title}</h3>
                       <p className="project-desc">{project.description}</p>
                       <div className="project-stack">
-                        {project.stack.map((tech, i) => (
+                        {(project.stack || []).map((tech, i) => (
                           <span key={i} className="stack-tag">{tech}</span>
                         ))}
                       </div>
