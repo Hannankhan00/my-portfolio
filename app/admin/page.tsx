@@ -656,7 +656,7 @@ export default function AdminDashboard() {
                 <div className="adm-field adm-field--full">
                   <label className="adm-label">Project Image</label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <div className="adm-upload-row">
                       <input
                         id="proj-image"
                         type="text"
@@ -667,17 +667,8 @@ export default function AdminDashboard() {
                       />
                       <label
                         htmlFor="proj-upload"
-                        className="adm-btn adm-btn--ghost"
-                        style={{
-                          cursor: uploading ? 'not-allowed' : 'pointer',
-                          whiteSpace: 'nowrap',
-                          margin: 0,
-                          padding: '0.65rem 1rem',
-                          fontSize: '0.8rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.4rem',
-                        }}
+                        className="adm-upload-btn"
+                        style={{ cursor: uploading ? 'not-allowed' : 'pointer' }}
                       >
                         {uploading ? <span className="adm-spinner" /> : (
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16">
@@ -698,11 +689,10 @@ export default function AdminDashboard() {
                       />
                     </div>
                     {form.image && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem' }}>
+                      <div className="adm-img-preview">
                         <img
                           src={form.image}
                           alt="Preview"
-                          style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)' }}
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
                         <span className="adm-hint" style={{ color: '#c084fc' }}>✓ Image attached</span>

@@ -237,3 +237,32 @@
 .login-back a:hover {
   color: rgba(255, 255, 255, 0.7);
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 2.25rem 1.25rem;
+    border-radius: 22px;
+    width: calc(100vw - 1.5rem);
+  }
+
+  .login-icon {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 1.25rem;
+  }
+
+  .login-title {
+    font-size: 1.5rem;
+  }
+
+  .login-sub {
+    font-size: 0.8rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .login-btn {
+    min-height: 46px;
+    font-size: 0.9rem;
+  }
+}

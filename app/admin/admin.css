@@ -54,6 +54,11 @@
   padding: 4px;
 }
 
+.adm-sidebar-logo-text {
+  flex: 1;
+  min-width: 0;
+}
+
 .adm-logo-name {
   font-size: 0.95rem;
   font-weight: 600;
@@ -65,6 +70,27 @@
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.35);
   margin-top: 1px;
+}
+
+.adm-sidebar-close-btn {
+  display: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.adm-sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
 }
 
 .adm-nav {
@@ -864,21 +890,51 @@
   color: #fff;
 }
 
-/* ---- RESPONSIVE ---- */
-@media (max-width: 900px) {
-  .adm-sidebar {
-    display: none;
-  }
-  .adm-main {
-    padding: 1.5rem 1.25rem 3rem;
-  }
-  .adm-form-grid {
-    grid-template-columns: 1fr;
-  }
-  .adm-field--full,
-  .adm-field--toggle {
-    grid-column: span 1;
-  }
+/* Upload controls */
+.adm-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.adm-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.15rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.adm-upload-btn:hover {
+  background: rgba(192, 132, 252, 0.15);
+  border-color: rgba(192, 132, 252, 0.35);
+  color: #fff;
+}
+
+.adm-img-preview {
+  margin-top: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.adm-img-preview img {
+  width: 56px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 /* ========================================================
@@ -1107,29 +1163,422 @@
   transform: translateY(0);
 }
 
-/* ---- RESPONSIVE ---- */
-@media (max-width: 768px) {
+/* ========================================================
+   RESPONSIVE DESIGN SYSTEM
+   ======================================================== */
+
+/* Mobile Topbar Base State (hidden on desktop) */
+.adm-mobile-bar {
+  display: none;
+}
+
+.adm-sidebar-overlay {
+  display: none;
+}
+
+/* Tablet & Mobile Screens (<= 900px) */
+@media (max-width: 900px) {
   .adm-root {
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  /* Sticky Top Header */
+  .adm-mobile-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.25rem;
+    background: rgba(11, 4, 26, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 70;
+    width: 100%;
+  }
+
+  .adm-mobile-bar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .adm-mobile-bar-brand .adm-logo-img {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+
+  .adm-mobile-bar-text {
+    display: flex;
     flex-direction: column;
   }
 
+  .adm-mobile-bar-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .adm-mobile-bar-subtitle {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #c084fc;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .adm-mobile-menu-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .adm-mobile-menu-btn:hover {
+    background: rgba(192, 132, 252, 0.15);
+    border-color: rgba(192, 132, 252, 0.3);
+    color: #c084fc;
+  }
+
+  /* Backdrop Overlay */
+  .adm-sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 95;
+    animation: adm-overlay-fade 0.22s ease forwards;
+  }
+
+  /* Off-canvas Sliding Sidebar */
   .adm-sidebar {
-    position: relative;
-    width: 100%;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 1.25rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 290px;
+    max-width: 84vw;
+    height: 100vh;
+    height: 100dvh;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+    z-index: 100;
+    background: #0d0520;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 1.5rem 1.25rem 2rem;
+    box-shadow: none;
+  }
+
+  .adm-sidebar.open {
+    transform: translateX(0);
+    box-shadow: 16px 0 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(192, 132, 252, 0.12);
+  }
+
+  .adm-sidebar-close-btn {
+    display: flex;
   }
 
   .adm-sidebar-logo {
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.25rem;
+  }
+
+  /* Main area adjustment */
+  .adm-main {
+    margin-left: 0;
+    padding: 1.75rem 1.25rem 3.5rem;
+    width: 100%;
+    min-width: 0;
+    gap: 1.5rem;
+  }
+}
+
+/* Small Screens & Mobile (<= 640px) */
+@media (max-width: 640px) {
+  .adm-main {
+    padding: 1.25rem 1rem 3rem;
+    gap: 1.25rem;
+  }
+
+  .adm-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.9rem;
+  }
+
+  .adm-header .adm-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1.25rem;
+  }
+
+  .adm-page-title {
+    font-size: 1.45rem;
+  }
+
+  .adm-page-sub {
+    font-size: 0.8rem;
+  }
+
+  .adm-card {
+    padding: 1.25rem 1rem;
+    border-radius: 18px;
+  }
+
+  .adm-card-title {
+    font-size: 0.95rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .adm-reorder-hint {
+    font-size: 0.75rem;
+    line-height: 1.45;
+    align-items: flex-start;
+  }
+
+  .adm-reorder-hint svg {
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Project row responsive card layout */
+  .adm-project-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.95rem;
+    border-radius: 12px;
+  }
+
+  .adm-drag-handle {
+    width: 24px;
+    height: 32px;
+  }
+
+  .adm-project-num {
+    font-size: 0.75rem;
+    min-width: auto;
+  }
+
+  .adm-project-thumb {
+    width: 56px;
+    height: 38px;
+    border-radius: 6px;
+  }
+
+  .adm-row-actions {
+    margin-left: auto;
+    gap: 0.35rem;
+  }
+
+  .adm-edit-btn,
+  .adm-delete-btn {
+    width: 34px;
+    height: 34px;
+    padding: 0.35rem;
+  }
+
+  .adm-project-info {
+    flex-basis: 100%;
+    width: 100%;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .adm-project-title {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .adm-project-desc {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  .adm-project-stack {
+    gap: 0.3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .adm-tag {
+    font-size: 0.68rem;
+    padding: 0.15rem 0.5rem;
+  }
+
+  .adm-project-meta {
+    gap: 0.5rem;
+  }
+
+  .adm-project-link {
+    max-width: 100%;
+    word-break: break-all;
+    font-size: 0.75rem;
+  }
+
+  /* Social card responsive layout */
+  .adm-social-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.95rem;
+    border-radius: 12px;
+  }
+
+  .adm-social-icon-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+
+  .adm-social-icon-box svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .adm-social-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .adm-social-platform {
+    font-size: 0.9rem;
+  }
+
+  .adm-social-label {
+    font-size: 0.78rem;
+  }
+
+  .adm-social-url {
+    font-size: 0.74rem;
+    max-width: 100%;
+    word-break: break-all;
+  }
+
+  .adm-social-card .adm-row-actions {
+    margin-left: auto;
+    gap: 0.35rem;
+  }
+
+  /* Modals responsive adjustments */
+  .adm-modal-overlay {
+    padding: 0.75rem;
+    align-items: flex-end;
+  }
+
+  .adm-modal-card {
+    padding: 1.5rem 1.15rem;
+    border-radius: 20px 20px 14px 14px;
+    max-height: 92dvh;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  }
+
+  .adm-modal-header {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .adm-modal-title {
+    font-size: 1.1rem;
+  }
+
+  .adm-form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .adm-field--full,
+  .adm-field--toggle {
+    grid-column: span 1;
+  }
+
+  .adm-upload-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .adm-upload-btn {
+    width: 100%;
+  }
+
+  .adm-form-actions {
+    flex-direction: column-reverse;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+  }
+
+  .adm-form-actions .adm-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.8rem 1rem;
+  }
+
+  /* Floating Toast anchored bottom on mobile */
+  .adm-toast {
+    top: auto;
+    bottom: 1.25rem;
+    right: 1rem;
+    left: 1rem;
+    margin: 0 auto;
+    max-width: calc(100vw - 2rem);
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+/* Extra small devices (<= 480px) */
+@media (max-width: 480px) {
+  .adm-mobile-bar {
+    padding: 0.75rem 1rem;
   }
 
   .adm-main {
-    margin-left: 0;
-    padding: 1.5rem 1rem 3rem;
+    padding: 1rem 0.75rem 2.5rem;
+    gap: 1.15rem;
+  }
+
+  .adm-page-title {
+    font-size: 1.3rem;
+  }
+
+  .adm-project-row {
+    padding: 0.85rem 0.75rem;
+  }
+
+  .adm-social-card {
+    padding: 0.85rem 0.75rem;
+  }
+
+  .malkin-modal {
+    padding: 2rem 1.15rem 1.5rem;
+    border-radius: 22px;
+  }
+
+  .malkin-title {
+    font-size: 1.6rem;
+  }
+
+  .malkin-subtitle {
+    font-size: 0.86rem;
+    padding: 0;
   }
 }
 
