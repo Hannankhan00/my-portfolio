@@ -419,6 +419,36 @@ body > div:first-child {
   text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6);
 }
 
+.hero-name-container {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.shader-frame {
+  position: relative;
+  width: 100%;
+  height: clamp(140px, 22vw, 240px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #000000;
+  mix-blend-mode: screen;
+}
+
+.shader-frame iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: 0 !important;
+  display: block !important;
+}
+
+
 .hero-subtitle {
   font-size: clamp(0.95rem, 2.5vw, 1.2rem);
   color: var(--color-text-muted);

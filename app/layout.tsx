@@ -3,18 +3,12 @@ import { Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
-  variable: "--font-display",
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
-const interBody = Inter({
-  variable: "--font-body",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
-  display: "swap",
-});
 
 const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-mono",
@@ -39,7 +33,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${interBody.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      style={{
+        // @ts-ignore
+        '--font-display': 'var(--font-inter)',
+        '--font-body': 'var(--font-inter)',
+      }}
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>{children}</body>
     </html>

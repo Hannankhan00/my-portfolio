@@ -8,6 +8,8 @@ import Header from './components/Header';
 import ClickSpark from './components/ClickSpark';
 import ProfileCard from './components/ProfileCard';
 import initialProjects from '@/data/projects.json';
+import { Scene } from './components/HeroScene';
+
 
 const skillsData = [
   {
@@ -523,7 +525,10 @@ export default function Home() {
           {/* Hero Section */}
           <section id="hero" className="hero">
             <div className="hero-content">
-              <h1 className="hero-name" id="hero-name">Hannan Khan</h1>
+              <h1 className="sr-only">Hannan Khan</h1>
+              <div id="hero-name" className="hero-name-container">
+                <Scene />
+              </div>
               <p className="hero-subtitle" id="hero-subtitle">
                 Full Stack Developer · Building end-to-end digital products that are fast, scalable, and beautifully crafted
               </p>
