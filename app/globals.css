@@ -463,9 +463,37 @@ body > div:first-child {
   }
 }
 
+@keyframes chromatic-glitch {
+  0% {
+    transform: translate(0, 0);
+    text-shadow: none;
+  }
+  20% {
+    transform: translate(-2px, 0.5px);
+    text-shadow: -3px 0 rgba(255, 60, 75, 0.9), 3px 0 rgba(40, 255, 200, 0.85), 0 1px rgba(95, 135, 255, 0.7);
+  }
+  40% {
+    transform: translate(2px, -0.5px);
+    text-shadow: 2.5px 0 rgba(255, 60, 75, 0.85), -2.5px 0 rgba(40, 255, 200, 0.85);
+  }
+  60% {
+    transform: translate(-1px, 0px);
+    text-shadow: -1.5px 0 rgba(255, 60, 75, 0.7), 1.5px 0 rgba(40, 255, 200, 0.7);
+  }
+  80% {
+    transform: translate(0.5px, 0.5px);
+    text-shadow: 1px 0 rgba(255, 60, 75, 0.5), -1px 0 rgba(40, 255, 200, 0.5);
+  }
+  100% {
+    transform: translate(0, 0);
+    text-shadow: none;
+  }
+}
+
 .chromatic-char {
   display: inline-block;
   will-change: transform, opacity, filter, text-shadow;
+  transition: transform 0.15s ease, text-shadow 0.15s ease;
 }
 
 .chromatic-char.is-animating {
@@ -473,8 +501,15 @@ body > div:first-child {
   animation-delay: var(--delay, 0s);
 }
 
-.chromatic-wordmark-container:hover .chromatic-char:not(.is-animating) {
-  text-shadow: -2px 0 rgba(255, 64, 72, 0.65), 2px 0 rgba(64, 255, 190, 0.65), 0 1px rgba(96, 124, 255, 0.65);
+/* Hover glitch effect when intro has completed */
+.chromatic-wordmark-container.intro-completed.is-glitching .chromatic-char {
+  animation: chromatic-glitch 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation-delay: calc(var(--char-index, 0) * 0.025s);
+}
+
+.chromatic-wordmark-container.intro-completed .chromatic-char:hover {
+  transform: translate(-1.5px, -0.5px) scale(1.04);
+  text-shadow: -2.5px 0 rgba(255, 60, 75, 0.9), 2.5px 0 rgba(40, 255, 200, 0.9), 0 1px rgba(95, 135, 255, 0.75);
 }
 
 
