@@ -9,6 +9,8 @@ import ClickSpark from './components/ClickSpark';
 import ProfileCard from './components/ProfileCard';
 import initialProjects from '@/data/projects.json';
 import { Scene } from './components/HeroScene';
+import ChromaticTextIntro from './components/ChromaticTextIntro';
+
 
 
 const skillsData = [
@@ -261,20 +263,14 @@ export default function Home() {
           }
         });
 
-        heroTimeline.fromTo('#hero-name',
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0 }
-        );
-
         heroTimeline.fromTo('#hero-subtitle',
           { opacity: 0, y: 25 },
-          { opacity: 1, y: 0 },
-          '-=1.0'
+          { opacity: 1, y: 0, duration: 1.2, delay: 0.6 }
         );
 
         heroTimeline.fromTo('#hero-actions',
           { opacity: 0, y: 15 },
-          { opacity: 1, y: 0 },
+          { opacity: 1, y: 0, duration: 1.0 },
           '-=0.8'
         );
 
@@ -525,10 +521,9 @@ export default function Home() {
           {/* Hero Section */}
           <section id="hero" className="hero">
             <div className="hero-content">
-              <h1 className="sr-only">Hannan Khan</h1>
-              <div id="hero-name" className="hero-name-container">
-                <Scene />
-              </div>
+              <h1 className="hero-name" id="hero-name">
+                <ChromaticTextIntro text="Hannan Khan" />
+              </h1>
               <p className="hero-subtitle" id="hero-subtitle">
                 Full Stack Developer · Building end-to-end digital products that are fast, scalable, and beautifully crafted
               </p>

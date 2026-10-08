@@ -413,20 +413,71 @@ body > div:first-child {
   font-size: clamp(2.5rem, 9vw, 6rem);
   font-weight: 700;
   color: var(--color-text-main);
-  line-height: 1.0;
+  line-height: 1.1;
   margin-bottom: 1.5rem;
   letter-spacing: -0.04em;
-  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6);
-}
-
-.hero-name-container {
-  width: 100%;
-  max-width: 760px;
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 1rem;
+  position: relative;
 }
+
+.chromatic-wordmark-container {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+  position: relative;
+}
+
+@keyframes chromatic-assemble {
+  0% {
+    opacity: 0;
+    transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(var(--scale, 1.28));
+    text-shadow: -13px 0 rgba(255, 60, 75, 0.95), 13px 0 rgba(40, 255, 200, 0.9), 0 7px rgba(95, 135, 255, 0.9);
+    filter: blur(4px);
+  }
+  25% {
+    opacity: 0.85;
+    text-shadow: -10px 0 rgba(255, 60, 75, 0.9), 10px 0 rgba(40, 255, 200, 0.85), 0 5.5px rgba(95, 135, 255, 0.85);
+    filter: blur(3px);
+  }
+  60% {
+    opacity: 1;
+    text-shadow: -4px 0 rgba(255, 60, 75, 0.65), 4px 0 rgba(40, 255, 200, 0.65), 0 2.2px rgba(95, 135, 255, 0.65);
+    filter: blur(1.2px);
+  }
+  85% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+    text-shadow: -1.2px 0 rgba(255, 60, 75, 0.35), 1.2px 0 rgba(40, 255, 200, 0.35), 0 0.6px rgba(95, 135, 255, 0.35);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+    text-shadow: none;
+    filter: none;
+  }
+}
+
+.chromatic-char {
+  display: inline-block;
+  will-change: transform, opacity, filter, text-shadow;
+}
+
+.chromatic-char.is-animating {
+  animation: chromatic-assemble 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--delay, 0s);
+}
+
+.chromatic-wordmark-container:hover .chromatic-char:not(.is-animating) {
+  text-shadow: -2px 0 rgba(255, 64, 72, 0.65), 2px 0 rgba(64, 255, 190, 0.65), 0 1px rgba(96, 124, 255, 0.65);
+}
+
+
 
 .shader-frame {
   position: relative;

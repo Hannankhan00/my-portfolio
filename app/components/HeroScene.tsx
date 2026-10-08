@@ -1,20 +1,33 @@
 'use client';
 
-import { TextAnimationCollection } from "@designcodeio/threeui";
-import "@designcodeio/threeui/style.css";
+import { ChromaticTextIntro } from "./ChromaticTextIntro";
 
-export function Scene() {
+export interface SceneProps {
+  text?: string;
+  className?: string;
+}
+
+export function Scene({ text = "Hannan Khan", className = "" }: SceneProps) {
   return (
-    <div className="shader-frame">
-      <TextAnimationCollection
-        variant="threeui-intro"
-        mode="dark"
-        hue={0}
-        saturation={1.00}
-        brightness={1.00}
-      />
+    <div className={`shader-frame ${className}`} style={{ width: 'auto', height: 'auto', background: 'transparent' }}>
+      <ChromaticTextIntro text={text} />
     </div>
   );
+}
+
+// Support TextAnimationCollection alias with exact variant compatibility
+export function TextAnimationCollection({
+  text = "Hannan Khan",
+  variant = "threeui-intro",
+}: {
+  text?: string;
+  variant?: string;
+  mode?: string;
+  hue?: number;
+  saturation?: number;
+  brightness?: number;
+}) {
+  return <ChromaticTextIntro text={text} />;
 }
 
 export default Scene;
