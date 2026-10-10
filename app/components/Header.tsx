@@ -66,7 +66,7 @@ export default function Header() {
             tabIndex={isOpen ? 0 : -1}
             onClick={() => setOpen(false)}
           >
-            <img src="/assets/icon.png" alt="HK Logo" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
+            <img src="/assets/iconn.png" alt="HK Logo" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
           </a>
           <ul className="nav-links">
             <li>

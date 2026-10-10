@@ -50,7 +50,7 @@ export default function AdminSidebar({ activePage }: AdminSidebarProps) {
       {/* Mobile Top App Bar (visible on screens <= 900px) */}
       <header className="adm-mobile-bar">
         <div className="adm-mobile-bar-brand">
-          <img src="/assets/icon.png" alt="HK" className="adm-logo-img" />
+          <img src="/assets/iconn.png" alt="HK" className="adm-logo-img" />
           <div className="adm-mobile-bar-text">
             <span className="adm-mobile-bar-title">Hannan Khan</span>
             <span className="adm-mobile-bar-subtitle">
@@ -93,7 +93,7 @@ export default function AdminSidebar({ activePage }: AdminSidebarProps) {
       {/* Sidebar Drawer */}
       <aside className={`adm-sidebar ${mobileOpen ? 'open' : ''}`}>
         <div className="adm-sidebar-logo">
-          <img src="/assets/icon.png" alt="HK" className="adm-logo-img" />
+          <img src="/assets/iconn.png" alt="HK" className="adm-logo-img" />
           <div className="adm-sidebar-logo-text">
             <div className="adm-logo-name">Hannan Khan</div>
             <div className="adm-logo-role">Portfolio Admin</div>

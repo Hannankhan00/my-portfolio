@@ -10,6 +10,8 @@ import ProfileCard from './components/ProfileCard';
 import initialProjects from '@/data/projects.json';
 import { Scene } from './components/HeroScene';
 import ChromaticTextIntro from './components/ChromaticTextIntro';
+import HeroTerminalCard from './components/HeroTerminalCard';
+import ProjectModal from './components/ProjectModal';
 
 
 
@@ -33,6 +35,7 @@ const skillsData = [
     items: [
       { name: "Node.js", icon: "https://cdn.simpleicons.org/nodedotjs/5FA04E", color: "#5FA04E" },
       { name: "Express.js", icon: "https://cdn.simpleicons.org/express/white", color: "#ffffff" },
+      { name: "Nest.js", icon: "https://cdn.simpleicons.org/nestjs/E0234E", color: "#E0234E" },
     ]
   },
   {
@@ -53,6 +56,7 @@ type Project = {
   image: string;
   link: string;
   reversed: boolean;
+  github?: string;
 };
 
 type SocialItem = {
@@ -167,6 +171,16 @@ function renderSocialIcon(iconOrPlatform: string) {
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>(initialProjects as Project[]);
   const [socials, setSocials] = useState<SocialItem[]>(defaultSocials);
+  const [layoutMode, setLayoutMode] = useState<'showcase' | 'grid'>('showcase');
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+
+  const handleLayoutChange = (mode: 'showcase' | 'grid') => {
+    if (mode === layoutMode) return;
+    setLayoutMode(mode);
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 150);
+  };
 
   useEffect(() => {
     fetch('/api/projects')
@@ -258,19 +272,37 @@ export default function Home() {
         const heroTimeline = gsap.timeline({
           scrollTrigger: getScrollTrigger('#hero', 'top 95%'),
           defaults: {
-            duration: 1.2,
+            duration: 1.0,
             ease: 'power3.out'
           }
         });
 
-        heroTimeline.fromTo('#hero-subtitle',
+        heroTimeline.fromTo('#hero-greeting',
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 1.0, delay: 0.2 }
+        );
+
+        heroTimeline.fromTo('#hero-role',
           { opacity: 0, y: 25 },
-          { opacity: 1, y: 0, duration: 1.2, delay: 0.6 }
+          { opacity: 1, y: 0, duration: 0.9 },
+          '-=0.6'
+        );
+
+        heroTimeline.fromTo('#hero-summary',
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.9 },
+          '-=0.6'
         );
 
         heroTimeline.fromTo('#hero-actions',
           { opacity: 0, y: 15 },
-          { opacity: 1, y: 0, duration: 1.0 },
+          { opacity: 1, y: 0, duration: 0.8 },
+          '-=0.6'
+        );
+
+        heroTimeline.fromTo('#hero-visual',
+          { opacity: 0, scale: 0.88 },
+          { opacity: 1, scale: 1, duration: 1.1, ease: 'power2.out' },
           '-=0.8'
         );
 
@@ -369,9 +401,9 @@ export default function Home() {
     };
   }, []);
 
-  // Dedicated effect for Projects GSAP animation (reacts when projects change)
+  // Dedicated effect for Projects GSAP animation (reacts when projects change or layout switches)
   useEffect(() => {
-    if (!projects || projects.length === 0) return;
+    if (!projects || projects.length === 0 || layoutMode !== 'showcase') return;
 
     gsap.registerPlugin(ScrollTrigger);
 
@@ -476,7 +508,7 @@ export default function Home() {
       clearTimeout(refreshTimer);
       ctx.revert();
     };
-  }, [projects]);
+  }, [projects, layoutMode]);
 
   return (
     <ClickSpark
@@ -520,15 +552,29 @@ export default function Home() {
         <main>
           {/* Hero Section */}
           <section id="hero" className="hero">
-            <div className="hero-content">
-              <h1 className="hero-name" id="hero-name">
-                <ChromaticTextIntro text="Hannan Khan" />
-              </h1>
-              <p className="hero-subtitle" id="hero-subtitle">
-                Full Stack Developer · Building end-to-end digital products that are fast, scalable, and beautifully crafted
-              </p>
-              <div className="hero-actions" id="hero-actions">
-                <a href="#projects" className="btn btn-outline">View My Work</a>
+            <div className="section-container hero-container">
+              <div className="hero-content">
+                <h1 className="hero-greeting" id="hero-greeting">
+                  Hi, I&apos;m{' '}
+                  <span className="hero-name-wrapper">
+                    <ChromaticTextIntro text="Hannan" className="hero-name-chromatic" />
+                    <span className="hero-accent-dot">.</span>
+                  </span>
+                </h1>
+                <h2 className="hero-role" id="hero-role">
+                  I&apos;m a <span className="hero-role-highlight">Full Stack Developer</span><span className="hero-role-dot">.</span>
+                </h2>
+                <p className="hero-summary" id="hero-summary">
+                  I build and scale high-performance, beautifully crafted web applications and digital products. Specialized in the modern JavaScript ecosystem—React, Next.js, and Node.js—with a deep focus on clean code, thoughtful architecture, and pixel-perfect UX. Let&apos;s connect!
+                </p>
+                <div className="hero-actions" id="hero-actions">
+                  <a href="#connect" className="btn btn-outline hero-btn">
+                    Let&apos;s Talk
+                  </a>
+                </div>
+              </div>
+              <div className="hero-visual" id="hero-visual">
+                <HeroTerminalCard />
               </div>
             </div>
           </section>
@@ -622,27 +668,130 @@ export default function Home() {
           {/* Projects Section */}
           <section id="projects" className="projects-section">
             <div className="section-container">
-              <h2 className="section-title">Selected Work</h2>
-              <div className="projects-showcase">
-                {projects.map((project, index) => (
-                  <article key={project.id ?? index} className={`project-row ${project.reversed ? 'reversed' : ''}`}>
-                    <div className="project-visual">
-                      <img src={project.image} alt={project.title} loading="lazy" />
-                    </div>
-                    <div className="project-content">
-                      <span className="project-num">0{index + 1} /</span>
-                      <h3 className="project-name">{project.title}</h3>
-                      <p className="project-desc">{project.description}</p>
-                      <div className="project-stack">
-                        {(project.stack || []).map((tech, i) => (
-                          <span key={i} className="stack-tag">{tech}</span>
-                        ))}
-                      </div>
-                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="btn btn-outline">View Project</a>
-                    </div>
-                  </article>
-                ))}
+              <div className="projects-header-row">
+                <h2 className="section-title">Selected Work</h2>
+                <div className="layout-switcher" role="group" aria-label="Project layout view">
+                  <button
+                    type="button"
+                    className={`layout-switch-btn ${layoutMode === 'showcase' ? 'active' : ''}`}
+                    onClick={() => handleLayoutChange('showcase')}
+                    title="Showcase View"
+                    aria-pressed={layoutMode === 'showcase'}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                      <line x1="8" y1="21" x2="16" y2="21" />
+                      <line x1="12" y1="17" x2="12" y2="21" />
+                    </svg>
+                    <span>Showcase</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`layout-switch-btn ${layoutMode === 'grid' ? 'active' : ''}`}
+                    onClick={() => handleLayoutChange('grid')}
+                    title="Grid View"
+                    aria-pressed={layoutMode === 'grid'}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                    </svg>
+                    <span>Grid</span>
+                  </button>
+                </div>
               </div>
+
+              {layoutMode === 'showcase' ? (
+                <div className="projects-showcase">
+                  {projects.map((project, index) => (
+                    <article key={project.id ?? index} className={`project-row ${project.reversed ? 'reversed' : ''}`}>
+                      <div className="project-visual">
+                        <img src={project.image} alt={project.title} loading="lazy" />
+                      </div>
+                      <div className="project-content">
+                        <span className="project-num">0{index + 1} /</span>
+                        <h3 className="project-name">{project.title}</h3>
+                        <p className="project-desc">{project.description}</p>
+                        <div className="project-stack">
+                          {(project.stack || []).map((tech, i) => (
+                            <span key={i} className="stack-tag">{tech}</span>
+                          ))}
+                        </div>
+                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="btn btn-outline">View Project</a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="projects-grid">
+                  {projects.map((project, index) => (
+                    <article
+                      key={project.id ?? index}
+                      className="project-grid-card"
+                      onClick={() => setSelectedProject(project)}
+                    >
+                      <div className="project-grid-preview-box">
+                        <div className="project-grid-mockup">
+                          <img src={project.image} alt={project.title} />
+                        </div>
+                      </div>
+
+                      <div className="project-grid-header">
+                        <h3 className="project-grid-title">{project.title}</h3>
+                        <span className="project-grid-divider" aria-hidden="true" />
+                        <div className="project-grid-links" onClick={(e) => e.stopPropagation()}>
+                          <a
+                            href={project.github || 'https://github.com/Hannankhan00'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="project-grid-icon-link"
+                            title="GitHub"
+                            aria-label={`${project.title} GitHub`}
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                            </svg>
+                          </a>
+                          <a
+                            href={project.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="project-grid-icon-link"
+                            title="Live Project"
+                            aria-label={`${project.title} Live Link`}
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                              <polyline points="15 3 21 3 21 9" />
+                              <line x1="10" y1="14" x2="21" y2="3" />
+                            </svg>
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="project-grid-stack">
+                        {(project.stack || []).join(' - ')}
+                      </div>
+
+                      <p className="project-grid-desc">
+                        {project.description}{' '}
+                        <button
+                          type="button"
+                          className="project-grid-more-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedProject(project);
+                          }}
+                        >
+                          Learn more &gt;
+                        </button>
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
 
@@ -675,6 +824,12 @@ export default function Home() {
             <p className="copyright">© 2026 Hannan Khan</p>
           </div>
         </footer>
+
+        {/* Project Details Modal */}
+        <ProjectModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
       </div>
     </ClickSpark>
   );

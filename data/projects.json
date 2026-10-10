@@ -6,6 +6,7 @@
     "stack": ["Next.js", "TypeScript", "MySQL", "Python", "Groq API"],
     "image": "/assets/skillspill.png",
     "link": "https://skillspill.app",
+    "github": "https://github.com/Hannankhan00",
     "reversed": false
   },
   {
@@ -15,6 +16,7 @@
     "stack": ["Next.js", "Node.js", "Framer Motion"],
     "image": "/assets/devshift.png",
     "link": "https://devshift.vercel.app",
+    "github": "https://github.com/Hannankhan00",
     "reversed": true
   },
   {
@@ -24,6 +26,7 @@
     "stack": ["Next.js", "Node.js", "PostgreSQL"],
     "image": "/assets/corpulate.png",
     "link": "https://corpulate-kappa.vercel.app/",
+    "github": "https://github.com/Hannankhan00",
     "reversed": false
   }
 ]

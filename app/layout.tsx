@@ -21,7 +21,12 @@ export const metadata: Metadata = {
   title: "Hannan Khan | Web Developer",
   description: "Personal portfolio of Hannan Khan, a Full Stack Developer building fast, scalable, and beautifully crafted digital products.",
   icons: {
-    icon: "/assets/icon-square.png",
+    icon: [
+      { url: "/assets/favicon.png", type: "image/png" },
+      { url: "/favicon.ico?v=2" },
+    ],
+    shortcut: "/favicon.ico?v=2",
+    apple: "/assets/favicon.png",
   },
 };
 
