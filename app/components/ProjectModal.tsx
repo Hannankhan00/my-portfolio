@@ -67,7 +67,17 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
 
         {/* Top Image Preview Banner - Full Width Edge-to-Edge */}
         <div className="project-modal-banner">
-          <img src={project.image} alt={project.title} className="project-modal-banner-img" />
+          <img
+            src={project.image || '/assets/corpulate.png'}
+            alt={project.title || 'Project'}
+            className="project-modal-banner-img"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (!target.src.includes('corpulate.png')) {
+                target.src = '/assets/corpulate.png';
+              }
+            }}
+          />
         </div>
 
         {/* Modal Content Body */}

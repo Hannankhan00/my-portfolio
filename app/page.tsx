@@ -176,6 +176,14 @@ export default function Home() {
 
   const handleLayoutChange = (mode: 'showcase' | 'grid') => {
     if (mode === layoutMode) return;
+    // Kill any active ScrollTriggers on projects before switching
+    ScrollTrigger.getAll().forEach((st) => {
+      if (st.vars.trigger === '#projects' || (st.trigger && (st.trigger as HTMLElement).id === 'projects')) {
+        st.kill(true);
+      }
+    });
+    // Clear all GSAP inline styles on rows, visuals, contents, and the section container
+    gsap.set('.project-row, .project-visual, .project-content, #projects', { clearProps: 'all' });
     setLayoutMode(mode);
     setTimeout(() => {
       ScrollTrigger.refresh();
@@ -473,6 +481,7 @@ export default function Home() {
 
         return () => {
           gsap.set(projectRows, { clearProps: "all" });
+          gsap.set('.project-visual, .project-content', { clearProps: "all" });
         };
       });
 
@@ -706,9 +715,19 @@ export default function Home() {
               {layoutMode === 'showcase' ? (
                 <div className="projects-showcase">
                   {projects.map((project, index) => (
-                    <article key={project.id ?? index} className={`project-row ${project.reversed ? 'reversed' : ''}`}>
+                    <article key={`showcase-${project.id ?? index}`} className={`project-row ${project.reversed ? 'reversed' : ''}`}>
                       <div className="project-visual">
-                        <img src={project.image} alt={project.title} loading="lazy" />
+                        <img
+                          src={project.image || '/assets/corpulate.png'}
+                          alt={project.title || 'Project'}
+                          loading="eager"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            if (!target.src.includes('corpulate.png')) {
+                              target.src = '/assets/corpulate.png';
+                            }
+                          }}
+                        />
                       </div>
                       <div className="project-content">
                         <span className="project-num">0{index + 1} /</span>
@@ -728,13 +747,23 @@ export default function Home() {
                 <div className="projects-grid">
                   {projects.map((project, index) => (
                     <article
-                      key={project.id ?? index}
+                      key={`grid-${project.id ?? index}`}
                       className="project-grid-card"
                       onClick={() => setSelectedProject(project)}
                     >
                       <div className="project-grid-preview-box">
                         <div className="project-grid-mockup">
-                          <img src={project.image} alt={project.title} />
+                          <img
+                            src={project.image || '/assets/corpulate.png'}
+                            alt={project.title || 'Project'}
+                            loading="eager"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              if (!target.src.includes('corpulate.png')) {
+                                target.src = '/assets/corpulate.png';
+                              }
+                            }}
+                          />
                         </div>
                       </div>
 
