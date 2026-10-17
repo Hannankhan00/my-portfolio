@@ -769,6 +769,7 @@ body > div:first-child {
   color: #c084fc;
   background: linear-gradient(135deg, #d8b4fe 0%, #c084fc 45%, #a855f7 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
   filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.35));
