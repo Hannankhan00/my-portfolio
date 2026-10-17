@@ -13,8 +13,8 @@ const getBaseUrl = (): string => {
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`.replace(/\/$/, '');
   }
-  // Default fallback URL
-  return 'https://hannankhan.dev';
+  // Default fallback URL (matching Vercel production canonical domain)
+  return 'https://www.hannankhan.dev';
 };
 
 export const siteConfig = {
