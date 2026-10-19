@@ -83,13 +83,35 @@ const jsonLd = {
     {
       "@type": "Person",
       "@id": `${siteConfig.url}/#person`,
+      // Core identity — used by Google to build a Knowledge Panel
       name: siteConfig.name,
+      givenName: "Hannan",
+      familyName: "Khan",
+      nationality: "Pakistani",
+      description: "Full Stack Developer from Pakistan specializing in React, Next.js, and Node.js.",
       url: siteConfig.url,
-      image: `${siteConfig.url}/assets/favicon.png`,
-      jobTitle: "Full Stack Web Developer & UI/UX Specialist",
+      email: siteConfig.author.email,
+      jobTitle: "Full Stack Developer",
+      worksFor: {
+        "@type": "Organization",
+        name: "Freelance",
+      },
+      // image must point to your actual face photo — NOT a favicon or project screenshot.
+      // Add /public/assets/hannankhan.png for this to work.
+      image: {
+        "@type": "ImageObject",
+        url: `${siteConfig.url}/assets/hannankhan.png`,
+        width: 800,
+        height: 800,
+        caption: "Hannan Khan — Full Stack Developer",
+      },
+      // sameAs: every social profile you own — Google cross-references these
+      // to confirm this Person entity and build your Knowledge Panel.
       sameAs: [
         siteConfig.author.github,
         siteConfig.author.linkedin,
+        siteConfig.author.instagram,
+        `https://wa.me/923397197970`,
       ],
       knowsAbout: [
         "Web Development",
@@ -102,6 +124,7 @@ const jsonLd = {
         "Tailwind CSS",
         "GSAP",
         "Full Stack Development",
+        "UI/UX Design",
       ],
     },
     {
@@ -137,6 +160,10 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {/* rel="me" — tells Google these profiles belong to the same person */}
+        <link rel="me" href={siteConfig.author.github} />
+        <link rel="me" href={siteConfig.author.linkedin} />
+        <link rel="me" href={siteConfig.author.instagram} />
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>{children}</body>
     </html>

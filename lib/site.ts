@@ -19,27 +19,35 @@ const getBaseUrl = (): string => {
 
 export const siteConfig = {
   name: 'Hannan Khan',
-  title: 'Hannan Khan | Full Stack Developer & UI/UX Specialist',
+  // Title: name first so it renders prominently in SERPs even when truncated.
+  title: 'Hannan Khan — Full Stack Developer & UI/UX Specialist',
+  // Description: written to maximise CTR from position 5.
+  // – States WHO (Hannan Khan), WHAT (Full Stack Developer), WHERE (Pakistan)
+  // – Includes a clear value prop and a soft CTA.
   description:
-    'Personal portfolio of Hannan Khan, a Full Stack Developer building fast, scalable, and beautifully crafted digital products with Next.js, React, Node.js, and TypeScript.',
+    'Hannan Khan is a Full Stack Developer from Pakistan building fast web apps with Next.js, React, and Node.js. View projects and get in touch.',
   url: getBaseUrl(),
-  ogImage: '/assets/skillspill.png',
+  // ogImage: Use a branded 1200×630 photo of yourself for Google Image results.
+  // Replace this file with your actual branded OG photo.
+  ogImage: '/assets/og-hannankhan.png',
   author: {
     name: 'Hannan Khan',
     email: 'hannankhan@gmail.com',
     github: 'https://github.com/Hannankhan00',
     linkedin: 'https://www.linkedin.com/in/hannankhan',
+    instagram: 'https://www.instagram.com/hannankhan',
     whatsapp: 'https://wa.me/923397197970',
   },
   keywords: [
     'Hannan Khan',
     'Hannan Khan Portfolio',
-    'Full Stack Developer',
+    'Hannan Khan Developer',
+    'Full Stack Developer Pakistan',
     'Full Stack Web Developer',
     'Next.js Developer',
     'React Developer',
     'Frontend Developer',
-    'Software Engineer',
+    'Software Engineer Pakistan',
     'Web Developer Portfolio',
     'TypeScript Developer',
     'Tailwind CSS Developer',
