@@ -415,7 +415,7 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
                   handle="hannankhan"
                   status="Open to work ✦"
                   contactText="Hire Me"
-                  avatarUrl="/assets/hannankhan.png"
+                  avatarUrl="/assets/hannankhan.webp"
                   showUserInfo={false}
                   enableTilt={true}
                   enableMobileTilt={false}

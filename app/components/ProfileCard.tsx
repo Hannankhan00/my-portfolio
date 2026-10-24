@@ -312,8 +312,14 @@ const ProfileCardComponent = ({
                 src={avatarUrl}
                 alt={`${name} avatar`}
                 loading="lazy"
+                decoding="async"
                 onError={e => {
-                  (e.target as HTMLImageElement).style.display = 'none';
+                  const t = e.target as HTMLImageElement;
+                  if (t.src.includes('.webp')) {
+                    t.src = '/assets/hannankhan.png';
+                  } else {
+                    t.style.display = 'none';
+                  }
                 }}
               />
               {showUserInfo && (

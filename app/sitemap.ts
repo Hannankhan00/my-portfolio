@@ -13,6 +13,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .map((img) => (img.startsWith('http') ? img : `${baseUrl}${img.startsWith('/') ? '' : '/'}${img}`));
 
   const allImages = [
+    `${baseUrl}/assets/hannankhan.png`,
+    `${baseUrl}/assets/og-hannankhan.png`,
     `${baseUrl}/assets/favicon.png`,
     ...projectImages,
   ];
