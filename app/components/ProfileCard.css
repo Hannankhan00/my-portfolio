@@ -245,8 +245,8 @@
   left: 50%;
   transform-origin: 50% 100%;
   transform: translateX(calc(-50% + (var(--pointer-from-left) - 0.5) * 6px)) translateZ(0) scaleY(calc(1 + (var(--pointer-from-top) - 0.5) * 0.02)) scaleX(calc(1 + (var(--pointer-from-left) - 0.5) * 0.01));
-  bottom: -60px;
-  /* Moved down to prevent face overlap */
+  bottom: -15px;
+  /* Balanced position for optimal face spacing */
   backface-visibility: hidden;
   will-change: transform;
   transition: transform 120ms ease-out;
@@ -358,7 +358,7 @@
 .pc-details {
   width: 100%;
   position: absolute;
-  top: 1.5em;
+  top: 2.3em;
   display: flex;
   flex-direction: column;
 }
@@ -414,7 +414,7 @@
   }
 
   .pc-details {
-    top: 1.5em;
+    top: 2.1em;
   }
 
   .pc-details h3 {
@@ -428,7 +428,7 @@
   }
 
   .pc-avatar-content .avatar {
-    bottom: -55px;
+    bottom: -15px;
     width: 105%;
   }
 
