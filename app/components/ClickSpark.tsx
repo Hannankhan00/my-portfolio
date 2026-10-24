@@ -78,20 +78,25 @@ export default function ClickSpark({
     [easing]
   );
 
-  // Render loop
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  const animationIdRef = useRef<number | null>(null);
+  const isAnimatingRef = useRef(false);
 
-    let animationId: number;
+  const draw = useCallback(
+    (timestamp: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        isAnimatingRef.current = false;
+        return;
+      }
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        isAnimatingRef.current = false;
+        return;
+      }
 
-    const draw = (timestamp: number) => {
-      if (!startTimeRef.current) startTimeRef.current = timestamp;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      sparksRef.current = sparksRef.current.filter(spark => {
+      sparksRef.current = sparksRef.current.filter((spark) => {
         const elapsed = timestamp - spark.startTime;
         if (elapsed >= duration) return false;
 
@@ -115,12 +120,23 @@ export default function ClickSpark({
         return true;
       });
 
-      animationId = requestAnimationFrame(draw);
-    };
+      if (sparksRef.current.length > 0) {
+        animationIdRef.current = requestAnimationFrame(draw);
+      } else {
+        isAnimatingRef.current = false;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    },
+    [duration, easeFunc, extraScale, sparkColor, sparkRadius, sparkSize]
+  );
 
-    animationId = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(animationId);
-  }, [sparkColor, sparkSize, sparkRadius, sparkCount, duration, easeFunc, extraScale]);
+  useEffect(() => {
+    return () => {
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
+      }
+    };
+  }, []);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const canvas = canvasRef.current;
@@ -138,6 +154,11 @@ export default function ClickSpark({
     }));
 
     sparksRef.current.push(...newSparks);
+
+    if (!isAnimatingRef.current) {
+      isAnimatingRef.current = true;
+      animationIdRef.current = requestAnimationFrame(draw);
+    }
   };
 
   return (

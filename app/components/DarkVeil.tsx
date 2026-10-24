@@ -137,6 +137,19 @@ export default function DarkVeil({
     window.addEventListener('resize', resize);
     resize();
 
+    const isMobile = window.innerWidth <= 768;
+
+    // Render initial static frame immediately
+    program.uniforms.uTime.value = 0;
+    renderer.render({ scene: mesh });
+
+    // On mobile, keep the beautiful static render and do not run continuous GPU animation
+    if (isMobile) {
+      return () => {
+        window.removeEventListener('resize', resize);
+      };
+    }
+
     const start = performance.now();
     let frame = 0;
     let lastRender = 0;
@@ -145,6 +158,7 @@ export default function DarkVeil({
 
     const loop = (now: number) => {
       frame = requestAnimationFrame(loop);
+      if (document.hidden) return; // Pause while tab is inactive
       if (now - lastRender < FRAME_MS) return; // skip frame
       lastRender = now;
       program.uniforms.uTime.value = ((now - start) / 1000) * speed;

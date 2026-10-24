@@ -7,10 +7,11 @@ import DarkVeil from './components/DarkVeil';
 import Header from './components/Header';
 import ClickSpark from './components/ClickSpark';
 import ProfileCard from './components/ProfileCard';
-import { Scene } from './components/HeroScene';
+import dynamic from 'next/dynamic';
 import ChromaticTextIntro from './components/ChromaticTextIntro';
 import HeroTerminalCard from './components/HeroTerminalCard';
-import ProjectModal from './components/ProjectModal';
+
+const ProjectModal = dynamic(() => import('./components/ProjectModal'), { ssr: false });
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -250,11 +251,11 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
           defaults: { duration: 1.0, ease: 'power3.out' },
         });
         heroTimeline
-          .fromTo('#hero-greeting', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1.0, delay: 0.2 })
-          .fromTo('#hero-role', { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.9 }, '-=0.6')
-          .fromTo('#hero-summary', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.9 }, '-=0.6')
-          .fromTo('#hero-actions', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.8 }, '-=0.6')
-          .fromTo('#hero-visual', { opacity: 0, scale: 0.88 }, { opacity: 1, scale: 1, duration: 1.1, ease: 'power2.out' }, '-=0.8');
+          .from('#hero-greeting', { y: 20, duration: 0.7, ease: 'power2.out' })
+          .from('#hero-role', { y: 16, duration: 0.6, ease: 'power2.out' }, '-=0.4')
+          .from('#hero-summary', { opacity: 0.3, y: 14, duration: 0.6, ease: 'power2.out' }, '-=0.4')
+          .from('#hero-actions', { opacity: 0.2, y: 10, duration: 0.5, ease: 'power2.out' }, '-=0.4')
+          .from('#hero-visual', { opacity: 0.3, scale: 0.94, duration: 0.8, ease: 'power2.out' }, '-=0.5');
 
         // About
         gsap.fromTo('.about-text > *', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1, stagger: 0.15, ease: 'power3.out', scrollTrigger: getScrollTrigger('.about-text') });
@@ -358,7 +359,7 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
                 <h1 className="hero-greeting" id="hero-greeting">
                   Hi, I&apos;m{' '}
                   <span className="hero-name-wrapper">
-                    <ChromaticTextIntro text="Hannan" className="hero-name-chromatic" />
+                    <ChromaticTextIntro text="Hannan Khan" className="hero-name-chromatic" />
                     <span className="hero-accent-dot">.</span>
                   </span>
                 </h1>
@@ -483,7 +484,8 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
                         <img
                           src={project.image || '/assets/corpulate.png'}
                           alt={`${project.title} — project by Hannan Khan`}
-                          loading="eager"
+                          loading="lazy"
+                          decoding="async"
                           onError={(e) => {
                             const target = e.currentTarget;
                             if (!target.src.includes('corpulate.png')) target.src = '/assets/corpulate.png';
@@ -513,7 +515,8 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
                           <img
                             src={project.image || '/assets/corpulate.png'}
                             alt={`${project.title} — project by Hannan Khan`}
-                            loading="eager"
+                            loading="lazy"
+                            decoding="async"
                             onError={(e) => {
                               const target = e.currentTarget;
                               if (!target.src.includes('corpulate.png')) target.src = '/assets/corpulate.png';
