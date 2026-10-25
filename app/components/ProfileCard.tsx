@@ -310,7 +310,7 @@ const ProfileCardComponent = ({
               <img
                 className="avatar"
                 src={avatarUrl}
-                alt={`${name} avatar`}
+                alt={`${name} — Full Stack Developer`}
                 loading="lazy"
                 decoding="async"
                 onError={e => {

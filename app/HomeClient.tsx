@@ -439,7 +439,7 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
                     <div className="skills-grid-new">
                       {category.items.map((skill, i) => (
                         <div key={i} className="skill-card" style={{ '--hover-color': skill.color } as React.CSSProperties}>
-                          <img src={skill.icon} alt={`${skill.name} icon`} className="skill-icon" loading="lazy" />
+                          <img src={skill.icon} alt={`${skill.name} — Hannan Khan Tech Stack`} className="skill-icon" loading="lazy" />
                           <span className="skill-name">{skill.name}</span>
                         </div>
                       ))}
