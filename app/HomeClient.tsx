@@ -1,15 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import DarkVeil from './components/DarkVeil';
 import Header from './components/Header';
-import ClickSpark from './components/ClickSpark';
+import JellyCursor from './components/JellyCursor';
+import ScrollProgress from './components/ScrollProgress';
+import BackToTop from './components/BackToTop';
+import ContactForm from './components/ContactForm';
 import ProfileCard from './components/ProfileCard';
 import dynamic from 'next/dynamic';
 import ChromaticTextIntro from './components/ChromaticTextIntro';
-import HeroTerminalCard from './components/HeroTerminalCard';
+import HeroTechSphere from './components/HeroTechSphere';
+import HeroTypewriter from './components/HeroTypewriter';
 
 const ProjectModal = dynamic(() => import('./components/ProjectModal'), { ssr: false });
 
@@ -32,6 +36,17 @@ export type SocialItem = {
   label: string;
   url: string;
   icon?: string;
+};
+
+export type ExperienceItem = {
+  id: number | string;
+  role: string;
+  company: string;
+  period: string;
+  description: string;
+  is_current: boolean;
+  tags?: string[];
+  highlights?: string[];
 };
 
 // ─── Skill data (static – no need to come from DB) ────────────────────────────
@@ -77,14 +92,18 @@ function renderSocialIcon(iconOrPlatform: string) {
     return (
       <svg
         className="connect-icon"
-        viewBox="0 0 24 24"
+        viewBox="1.8 1.8 20.4 20.4"
         width="24"
         height="24"
-        fill="currentColor"
-        style={{ stroke: 'none' }}
+        stroke="currentColor"
+        strokeWidth="1.4"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         aria-label="WhatsApp"
       >
-        <path d="M17.472 14.382c-.301-.15-1.767-.867-2.04-.966-.271-.101-.469-.15-.668.149-.197.297-.767.966-.94 1.164-.173.199-.347.223-.648.074-.3-.149-1.264-.462-2.408-1.477-.891-.795-1.493-1.777-1.666-2.074-.173-.297-.018-.458.13-.606.134-.133.298-.347.447-.52.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.01-1.42.25-.69.25-1.29.173-1.414zM12.04 2.004c-5.504 0-9.977 4.473-9.977 9.977 0 1.76.457 3.473 1.328 4.981l-1.41 5.15 5.27-1.382a9.92 9.92 0 0 0 4.789 1.228h.004c5.504 0 9.977-4.473 9.977-9.977a9.917 9.917 0 0 0-2.923-7.054 9.917 9.917 0 0 0-7.058-2.923zm0 18.333h-.003a8.27 8.27 0 0 1-4.218-1.155l-.302-.18-3.134.822.836-3.056-.197-.314a8.266 8.266 0 0 1-1.267-4.473c0-4.568 3.717-8.285 8.285-8.285a8.243 8.243 0 0 1 5.858 2.428 8.243 8.243 0 0 1 2.428 5.858c0 4.568-3.717 8.285-8.286 8.285z" />
+        <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+        <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
       </svg>
     );
   }
@@ -167,29 +186,16 @@ function renderSocialIcon(iconOrPlatform: string) {
 interface HomeClientProps {
   initialProjects: Project[];
   initialSocials: SocialItem[];
+  initialExperience: ExperienceItem[];
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function HomeClient({ initialProjects, initialSocials }: HomeClientProps) {
+export default function HomeClient({ initialProjects, initialSocials, initialExperience }: HomeClientProps) {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [socials, setSocials] = useState<SocialItem[]>(initialSocials);
-  const [layoutMode, setLayoutMode] = useState<'showcase' | 'grid'>('showcase');
+  const [experience, setExperience] = useState<ExperienceItem[]>(initialExperience);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-
-  const handleLayoutChange = (mode: 'showcase' | 'grid') => {
-    if (mode === layoutMode) return;
-    ScrollTrigger.getAll().forEach((st) => {
-      if (st.vars.trigger === '#projects' || (st.trigger && (st.trigger as HTMLElement).id === 'projects')) {
-        st.kill(true);
-      }
-    });
-    gsap.set('.project-row, .project-visual, .project-content, #projects', { clearProps: 'all' });
-    setLayoutMode(mode);
-    setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 150);
-  };
 
   // ── Refresh data in background (keeps admin edits live without blocking SSR) ──
   useEffect(() => {
@@ -197,6 +203,11 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
       .then((r) => { if (!r.ok) throw new Error('Failed to fetch projects'); return r.json(); })
       .then((data: Project[]) => { if (Array.isArray(data) && data.length > 0) setProjects(data); })
       .catch((err) => console.error('Background project refresh failed:', err));
+
+    fetch('/api/experience')
+      .then((r) => { if (!r.ok) throw new Error('Failed to fetch experience'); return r.json(); })
+      .then((data: ExperienceItem[]) => { if (Array.isArray(data)) setExperience(data); })
+      .catch((err) => console.error('Background experience refresh failed:', err));
 
     fetch('/api/socials')
       .then((r) => { if (!r.ok) throw new Error('Failed to fetch socials'); return r.json(); })
@@ -261,6 +272,10 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
         gsap.fromTo('.about-text > *', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1, stagger: 0.15, ease: 'power3.out', scrollTrigger: getScrollTrigger('.about-text') });
         gsap.fromTo('.about-card', { opacity: 0, scale: 0.9, y: 50 }, { opacity: 1, scale: 1, y: 0, duration: 1.2, ease: 'power3.out', scrollTrigger: getScrollTrigger('.about-card') });
 
+        // Experience
+        gsap.fromTo('.experience-line-fill', { scaleY: 0 }, { scaleY: 1, ease: 'none', scrollTrigger: { trigger: '.experience-timeline', start: 'top 65%', end: 'bottom 65%', scrub: true } });
+        gsap.fromTo('.experience-item', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.9, stagger: 0.2, ease: 'power3.out', scrollTrigger: getScrollTrigger('#experience') });
+
         // Skills
         gsap.fromTo('.skill-category-title', { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.8, stagger: 0.2, ease: 'power3.out', scrollTrigger: getScrollTrigger('#skills') });
         gsap.fromTo('.skill-card', { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.05, ease: 'power2.out', scrollTrigger: getScrollTrigger('#skills') });
@@ -275,73 +290,25 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
     return () => { clearTimeout(timeout); ctx.revert(); };
   }, []);
 
-  // ── Projects GSAP (re-runs when projects or layout changes) ───────────────
-  useEffect(() => {
-    if (!projects || projects.length === 0 || layoutMode !== 'showcase') return;
-
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      const showcase = document.querySelector('.projects-showcase');
-      const projectRows = gsap.utils.toArray('.project-row') as HTMLElement[];
-      if (!showcase || projectRows.length === 0) return;
-
-      const mm = gsap.matchMedia();
-
-      mm.add('(min-width: 901px)', () => {
-        const pinTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: '#projects',
-            pin: true,
-            scrub: 1,
-            start: 'top top',
-            end: () => '+=' + window.innerHeight * projectRows.length,
-          },
-        });
-
-        projectRows.forEach((row, i) => {
-          const isReversed = row.classList.contains('reversed');
-          const visual = row.querySelector('.project-visual');
-          const content = row.querySelector('.project-content');
-
-          gsap.set(row, { opacity: 0, visibility: 'hidden', pointerEvents: 'none' });
-
-          if (i === 0) {
-            gsap.set(row, { opacity: 1, visibility: 'visible', pointerEvents: 'auto' });
-            if (visual) gsap.set(visual, { opacity: 1, scale: 1, y: 0 });
-            if (content) gsap.set(content, { opacity: 1, x: 0 });
-          } else {
-            pinTl.to(row, { autoAlpha: 1, pointerEvents: 'auto', duration: 0.1 }, '+=0.2');
-            if (visual) pinTl.fromTo(visual, { opacity: 0, scale: 0.9, y: 80 }, { opacity: 1, scale: 1, y: 0, duration: 1, ease: 'power2.out' }, '<');
-            if (content) pinTl.fromTo(content, { opacity: 0, x: isReversed ? -80 : 80 }, { opacity: 1, x: 0, duration: 1, ease: 'power2.out' }, '<0.2');
-          }
-
-          if (i !== projectRows.length - 1) {
-            if (visual) pinTl.to(visual, { opacity: 0, scale: 0.95, y: -40, duration: 0.8, ease: 'power2.in' }, '+=1');
-            if (content) pinTl.to(content, { opacity: 0, y: -20, duration: 0.8, ease: 'power2.in' }, '<');
-            pinTl.set(row, { pointerEvents: 'none', visibility: 'hidden' });
-          }
-        });
-
-        return () => { gsap.set(projectRows, { clearProps: 'all' }); gsap.set('.project-visual, .project-content', { clearProps: 'all' }); };
-      });
-
-      mm.add('(max-width: 900px)', () => {
-        projectRows.forEach((row) => {
-          gsap.fromTo(row, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: row, start: 'top 85%', toggleActions: 'play none none reverse' } });
-        });
-        return () => { gsap.set(projectRows, { clearProps: 'all' }); };
-      });
-    });
-
-    const refreshTimer = setTimeout(() => { ScrollTrigger.refresh(); }, 200);
-    return () => { clearTimeout(refreshTimer); ctx.revert(); };
-  }, [projects, layoutMode]);
+  const railSections = useMemo(
+    () => [
+      { id: 'hero', label: 'Home' },
+      { id: 'about', label: 'About' },
+      ...(experience.length > 0 ? [{ id: 'experience', label: 'Experience' }] : []),
+      { id: 'skills', label: 'Skills' },
+      { id: 'projects', label: 'Projects' },
+      { id: 'connect', label: 'Connect' },
+    ],
+    [experience.length]
+  );
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <ClickSpark sparkColor="#c084fc" sparkSize={14} sparkRadius={28} sparkCount={10} duration={450} easing="ease-out" extraScale={1.1}>
+    <>
+      <JellyCursor />
+      <ScrollProgress sections={railSections} />
+      <BackToTop />
       <div style={{ overflowX: 'hidden', width: '100%', position: 'relative', minHeight: '100vh' }}>
         {/* WebGL Background */}
         <div aria-hidden="true" style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', zIndex: -1 }}>
@@ -357,7 +324,7 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
             <div className="section-container hero-container">
               <div className="hero-content">
                 <h1 className="hero-greeting" id="hero-greeting">
-                  Hi, I&apos;m{' '}
+                  <span className="hero-hi">Hi, I&apos;m</span>
                   <span className="hero-name-wrapper">
                     <ChromaticTextIntro text="Hannan Khan" className="hero-name-chromatic" />
                     <span className="hero-accent-dot">.</span>
@@ -367,16 +334,20 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
                   I&apos;m a <span className="hero-role-highlight">Full Stack Developer</span><span className="hero-role-dot">.</span>
                 </h2>
                 <p className="hero-summary" id="hero-summary">
-                  I build and scale high-performance, beautifully crafted web applications and digital products. Specialized in the modern JavaScript ecosystem—React, Next.js, and Node.js—with a deep focus on clean code, thoughtful architecture, and pixel-perfect UX. Let&apos;s connect!
+                  <HeroTypewriter />
                 </p>
                 <div className="hero-actions" id="hero-actions">
-                  <a href="#connect" className="btn btn-outline hero-btn">Let&apos;s Talk</a>
+                  <a href="https://wa.me/923397197970" target="_blank" rel="noopener noreferrer" className="btn btn-outline hero-btn">Let&apos;s Talk</a>
                 </div>
               </div>
               <div className="hero-visual" id="hero-visual">
-                <HeroTerminalCard />
+                <HeroTechSphere />
               </div>
             </div>
+            <a href="#about" className="hero-scroll" aria-label="Scroll to About">
+              <span className="hero-scroll-text">Scroll</span>
+              <span className="hero-scroll-line" aria-hidden="true" />
+            </a>
           </section>
 
           {/* ── About ───────────────────────────────────────────────────── */}
@@ -428,6 +399,50 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
             </div>
           </section>
 
+          {/* ── Experience ──────────────────────────────────────────────── */}
+          {experience.length > 0 && (
+          <section id="experience" className="experience-section">
+            <div className="section-container">
+              <h2 className="section-title">Experience</h2>
+              <div className="experience-timeline">
+                <div className="experience-line" aria-hidden="true">
+                  <div className="experience-line-fill" />
+                </div>
+                <ol className="experience-list">
+                {experience.map((job) => (
+                  <li key={job.id} className="experience-item">
+                    <span className="experience-marker" aria-hidden="true" />
+                    <div className="experience-card">
+                      <div className="experience-head">
+                        <div>
+                          <h3 className="experience-role">{job.role}</h3>
+                          <p className="experience-company">{job.company}</p>
+                        </div>
+                        <span className={`experience-period ${job.is_current ? 'current' : ''}`}>
+                          {job.is_current && <span className="experience-live-dot" aria-hidden="true" />}
+                          {job.period}
+                        </span>
+                      </div>
+                      {job.description && <p className="experience-desc">{job.description}</p>}
+                      {job.highlights && job.highlights.length > 0 && (
+                        <ul className="experience-highlights">
+                          {job.highlights.map((h, i) => <li key={i}>{h}</li>)}
+                        </ul>
+                      )}
+                      {job.tags && job.tags.length > 0 && (
+                        <ul className="experience-tags" aria-label="Technologies used">
+                          {job.tags.map((t) => <li key={t} className="experience-tag">{t}</li>)}
+                        </ul>
+                      )}
+                    </div>
+                  </li>
+                ))}
+                </ol>
+              </div>
+            </div>
+          </section>
+          )}
+
           {/* ── Skills ──────────────────────────────────────────────────── */}
           <section id="skills" className="skills-section">
             <div className="section-container">
@@ -454,59 +469,9 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
           <section id="projects" className="projects-section">
             <div className="section-container">
               <div className="projects-header-row">
-                <h2 className="section-title">Projects by Hannan Khan</h2>
-                <div className="layout-switcher" role="group" aria-label="Project layout view">
-                  <button type="button" className={`layout-switch-btn ${layoutMode === 'showcase' ? 'active' : ''}`} onClick={() => handleLayoutChange('showcase')} title="Showcase View" aria-pressed={layoutMode === 'showcase'}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                      <line x1="8" y1="21" x2="16" y2="21" />
-                      <line x1="12" y1="17" x2="12" y2="21" />
-                    </svg>
-                    <span>Showcase</span>
-                  </button>
-                  <button type="button" className={`layout-switch-btn ${layoutMode === 'grid' ? 'active' : ''}`} onClick={() => handleLayoutChange('grid')} title="Grid View" aria-pressed={layoutMode === 'grid'}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                      <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                      <rect x="14" y="14" width="7" height="7" rx="1.5" />
-                      <rect x="3" y="14" width="7" height="7" rx="1.5" />
-                    </svg>
-                    <span>Grid</span>
-                  </button>
-                </div>
+                <h2 className="section-title">Projects</h2>
               </div>
 
-              {layoutMode === 'showcase' ? (
-                <div className="projects-showcase">
-                  {projects.map((project, index) => (
-                    <article key={`showcase-${project.id ?? index}`} className={`project-row ${project.reversed ? 'reversed' : ''}`}>
-                      <div className="project-visual">
-                        <img
-                          src={project.image || '/assets/corpulate.png'}
-                          alt={`${project.title} — project by Hannan Khan`}
-                          loading="lazy"
-                          decoding="async"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            if (!target.src.includes('corpulate.png')) target.src = '/assets/corpulate.png';
-                          }}
-                        />
-                      </div>
-                      <div className="project-content">
-                        <span className="project-num">0{index + 1} /</span>
-                        <h3 className="project-name">{project.title}</h3>
-                        <p className="project-desc">{project.description}</p>
-                        <div className="project-stack">
-                          {(project.stack || []).map((tech, i) => (
-                            <span key={i} className="stack-tag">{tech}</span>
-                          ))}
-                        </div>
-                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="btn btn-outline">View Project</a>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
                 <div className="projects-grid">
                   {projects.map((project, index) => (
                     <article key={`grid-${project.id ?? index}`} className="project-grid-card" onClick={() => setSelectedProject(project)}>
@@ -552,7 +517,6 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
                     </article>
                   ))}
                 </div>
-              )}
             </div>
           </section>
 
@@ -560,14 +524,19 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
           <section id="connect" className="connect-section">
             <div className="section-container">
               <h2 className="section-title">Let&apos;s Connect</h2>
-              <p className="connect-text">I&apos;m open to internships, freelance projects, and collaborations.</p>
-              <div className="connect-links" id="connect-links">
-                {socials.map((soc) => (
-                  <a key={soc.id} href={soc.url} target="_blank" rel="noopener noreferrer" className="connect-row">
-                    {renderSocialIcon(soc.icon || soc.platform)}
-                    <span className="connect-label">{soc.label}</span>
-                  </a>
-                ))}
+              <div className="connect-layout">
+                <div className="connect-info">
+                  <p className="connect-text">I&apos;m open to internships, freelance projects, and collaborations.</p>
+                  <div className="connect-links" id="connect-links">
+                    {socials.map((soc) => (
+                      <a key={soc.id} href={soc.url} target="_blank" rel="noopener noreferrer" className="connect-row">
+                        {renderSocialIcon(soc.icon || soc.platform)}
+                        <span className="connect-label">{soc.label}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+                <ContactForm />
               </div>
             </div>
           </section>
@@ -581,6 +550,6 @@ export default function HomeClient({ initialProjects, initialSocials }: HomeClie
 
         <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
       </div>
-    </ClickSpark>
+    </>
   );
 }

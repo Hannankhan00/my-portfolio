@@ -11,7 +11,8 @@
 
 import { sql } from '@/lib/db';
 import initialProjectsFallback from '@/data/projects.json';
-import HomeClient, { type Project, type SocialItem } from './HomeClient';
+import { getExperience } from '@/lib/experience';
+import HomeClient, { type Project, type SocialItem, type ExperienceItem } from './HomeClient';
 
 // Default socials shown if the DB is empty or unreachable
 const defaultSocials: SocialItem[] = [
@@ -53,6 +54,14 @@ export default async function Page() {
     console.error('[Page] Failed to fetch socials from DB, using defaults:', err);
   }
 
+  // ── Fetch experience from DB ───────────────────────────────────────────────
+  let experience: ExperienceItem[] = [];
+  try {
+    experience = await getExperience();
+  } catch (err) {
+    console.error('[Page] Failed to fetch experience from DB:', err);
+  }
+
   // ── Hand off to the client component ──────────────────────────────────────
   // The server has already rendered this component tree to HTML — Google reads
   // everything above this line statically. HomeClient hydrates on the client
@@ -61,6 +70,7 @@ export default async function Page() {
     <HomeClient
       initialProjects={projects}
       initialSocials={socials}
+      initialExperience={experience}
     />
   );
 }

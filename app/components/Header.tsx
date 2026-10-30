@@ -1,101 +1,112 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type MouseEvent } from 'react';
+
+const LINKS = [
+  { label: 'Home', href: '#hero' },
+  { label: 'About', href: '#about' },
+  { label: 'Experience', href: '#experience' },
+  { label: 'Skills', href: '#skills' },
+  { label: 'Work', href: '#projects' },
+  { label: 'Connect', href: '#connect' },
+];
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const headerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [origin, setOrigin] = useState({ x: 0, y: 0, r: 0 });
 
-  // Only run client-side to avoid hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Close on outside click
-  useEffect(() => {
-    if (!mounted) return;
-    const handleClick = (e: MouseEvent) => {
-      if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
-        setOpen(false);
+  const toggle = () => {
+    if (!open) {
+      // The circle grows out of the button, so measure where it is right now
+      const rect = buttonRef.current?.getBoundingClientRect();
+      if (rect) {
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const r = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y)) + 8;
+        setOrigin({ x, y, r });
       }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [mounted]);
+    }
+    setOpen((prev) => !prev);
+  };
 
-  // Close on Escape
+  const close = useCallback(() => setOpen(false), []);
+
+  // Escape closes, and the page behind doesn't scroll while the menu is open
   useEffect(() => {
-    if (!mounted) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', onKey);
+    const prevOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.documentElement.style.overflow = prevOverflow;
     };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [mounted]);
+  }, [open, close]);
 
-  const isOpen = mounted && open;
+  const goTo = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    close();
+    // Scroll while the circle is still shrinking away
+    window.setTimeout(() => {
+      document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+    }, 350);
+  };
 
   return (
-    <div className="header-wrapper" ref={headerRef} suppressHydrationWarning>
-      <div className={`header-morph${isOpen ? ' header-morph--open' : ''}`} suppressHydrationWarning>
-        {/* Hamburger toggle button — always visible */}
-        <button
-          className="hamburger-btn"
-          onClick={() => setOpen(prev => !prev)}
-          aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
-          aria-expanded={isOpen}
-          suppressHydrationWarning
-        >
-          <span className={`ham-bar ham-bar--top${isOpen ? ' ham-bar--top-open' : ''}`} />
-          <span className={`ham-bar ham-bar--mid${isOpen ? ' ham-bar--mid-open' : ''}`} />
-          <span className={`ham-bar ham-bar--bot${isOpen ? ' ham-bar--bot-open' : ''}`} />
-        </button>
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        className={`menu-btn${open ? ' menu-btn--open' : ''}`}
+        onClick={toggle}
+        aria-label={open ? 'Close navigation' : 'Open navigation'}
+        aria-expanded={open}
+        aria-controls="site-menu"
+      >
+        <span className="menu-bar menu-bar--top" />
+        <span className="menu-bar menu-bar--mid" />
+        <span className="menu-bar menu-bar--bot" />
+      </button>
 
-        {/* Nav content — fades/slides in when open */}
-        <nav
-          className={`morph-nav${isOpen ? ' morph-nav--visible' : ''}`}
-          aria-hidden={isOpen ? 'false' : 'true'}
-          suppressHydrationWarning
-        >
-          <a
-            href="#"
-            className="nav-logo"
-            aria-label="Hannan Khan Home"
-            tabIndex={isOpen ? 0 : -1}
-            onClick={() => setOpen(false)}
-          >
-            <img src="/assets/iconn.png" alt="HK Logo" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
-          </a>
-          <ul className="nav-links">
-            <li>
-              <a href="#skills" tabIndex={isOpen ? 0 : -1} onClick={() => setOpen(false)}>
-                Skills
-              </a>
-            </li>
-            <li>
-              <a href="#projects" tabIndex={isOpen ? 0 : -1} onClick={() => setOpen(false)}>
-                Work
-              </a>
-            </li>
-            <li>
-              <a href="#connect" tabIndex={isOpen ? 0 : -1} onClick={() => setOpen(false)}>
-                Connect
-              </a>
-            </li>
+      <div
+        id="site-menu"
+        className={`menu-overlay${open ? ' menu-overlay--open' : ''}`}
+        style={{ '--cx': `${origin.x}px`, '--cy': `${origin.y}px`, '--r': `${origin.r}px` } as CSSProperties}
+        inert={!open}
+      >
+        <a href="#hero" className="menu-logo" aria-label="Hannan Khan, home" onClick={(e) => goTo(e, '#hero')}>
+          <img src="/assets/iconn.png" alt="" />
+        </a>
+
+        <nav className="menu-nav" aria-label="Main">
+          <ul className="menu-list">
+            {LINKS.map((link, i) => (
+              <li key={link.href} className="menu-item" style={{ '--i': i } as CSSProperties}>
+                <a href={link.href} className="menu-link" onClick={(e) => goTo(e, link.href)}>
+                  <span className="menu-link-num">0{i + 1}</span>
+                  <span className="menu-link-inner">{link.label}</span>
+                  <span className="menu-link-arrow" aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))}
           </ul>
-          <a
-            href="#connect"
-            className="nav-cta"
-            tabIndex={isOpen ? 0 : -1}
-            onClick={() => setOpen(false)}
-          >
-            Let's Talk
-          </a>
         </nav>
+
+        <div className="menu-footer" style={{ '--i': LINKS.length } as CSSProperties}>
+          <span className="menu-footer-text">Hannan Khan · Full Stack Developer</span>
+          <a
+            href="https://wa.me/923397197970"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="menu-cta"
+            onClick={close}
+          >
+            Let&apos;s Talk
+          </a>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
-

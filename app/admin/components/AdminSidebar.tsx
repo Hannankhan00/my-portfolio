@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 interface AdminSidebarProps {
-  activePage?: 'projects' | 'socials';
+  activePage?: 'projects' | 'experience' | 'leads' | 'messages' | 'socials';
 }
 
 export default function AdminSidebar({ activePage }: AdminSidebarProps) {
@@ -13,7 +13,9 @@ export default function AdminSidebar({ activePage }: AdminSidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const current = activePage || (pathname?.includes('/socials') ? 'socials' : 'projects');
+  const current =
+    activePage ||
+    (pathname?.includes('/socials') ? 'socials' : pathname?.includes('/leads') ? 'leads' : pathname?.includes('/messages') ? 'messages' : pathname?.includes('/experience') ? 'experience' : 'projects');
 
   // Auto-close drawer on route change
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function AdminSidebar({ activePage }: AdminSidebarProps) {
           <div className="adm-mobile-bar-text">
             <span className="adm-mobile-bar-title">Hannan Khan</span>
             <span className="adm-mobile-bar-subtitle">
-              {current === 'projects' ? 'Projects' : 'Social Links'}
+              {current === 'projects' ? 'Projects' : current === 'experience' ? 'Experience' : current === 'messages' ? 'Messages' : current === 'leads' ? 'Leads' : 'Social Links'}
             </span>
           </div>
         </div>
@@ -122,6 +124,42 @@ export default function AdminSidebar({ activePage }: AdminSidebarProps) {
               <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
             </svg>
             Projects
+          </Link>
+
+          <Link
+            href="/admin/experience"
+            className={`adm-nav-link ${current === 'experience' ? 'active' : ''}`}
+            onClick={() => setMobileOpen(false)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            Experience
+          </Link>
+
+          <Link
+            href="/admin/leads"
+            className={`adm-nav-link ${current === 'leads' ? 'active' : ''}`}
+            onClick={() => setMobileOpen(false)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="5" height="18" rx="1" />
+              <rect x="10" y="3" width="5" height="12" rx="1" />
+              <rect x="17" y="3" width="4" height="8" rx="1" />
+            </svg>
+            Leads
+          </Link>
+
+          <Link
+            href="/admin/messages"
+            className={`adm-nav-link ${current === 'messages' ? 'active' : ''}`}
+            onClick={() => setMobileOpen(false)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            Messages
           </Link>
 
           <Link
