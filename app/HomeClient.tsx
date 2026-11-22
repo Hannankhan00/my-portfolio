@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import DarkVeil from './components/DarkVeil';
@@ -82,6 +82,14 @@ const skillsData = [
     ],
   },
 ];
+
+// Periodic-table style: short symbol per tool and an accent colour per group
+const SKILL_SYMBOLS: Record<string, string> = {
+  JavaScript: 'Js', TypeScript: 'Ts', React: 'Re', 'Next.js': 'Nx', 'Tailwind CSS': 'Tw', Sass: 'Sa',
+  Bootstrap: 'Bs', GSAP: 'Gs', 'Framer Motion': 'Fm', 'Node.js': 'No', 'Express.js': 'Ex', 'Nest.js': 'Ne',
+  MySQL: 'My', PostgreSQL: 'Pg', MongoDB: 'Mg',
+};
+const CATEGORY_COLORS: Record<string, string> = { Frontend: '#c084fc', Backend: '#38bdf8', Database: '#fbbf24' };
 
 // ─── Social icon renderer ─────────────────────────────────────────────────────
 
@@ -190,7 +198,16 @@ interface HomeClientProps {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+const CRAFT_CARDS = [
+  { title: 'Clean code', text: 'Readable today, maintainable tomorrow.' },
+  { title: 'Thoughtful UX', text: 'Interfaces that feel obvious to use.' },
+  { title: 'Pixel-perfect', text: 'The details are where craft shows.' },
+];
+
 export default function HomeClient({ initialProjects, initialSocials, initialExperience }: HomeClientProps) {
+  // Card order, front card first. Clicking a card moves it to the front.
+  const [craftOrder, setCraftOrder] = useState([2, 1, 0]);
+  const [skillFilter, setSkillFilter] = useState<string>('All');
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [socials, setSocials] = useState<SocialItem[]>(initialSocials);
   const [experience, setExperience] = useState<ExperienceItem[]>(initialExperience);
@@ -272,12 +289,10 @@ export default function HomeClient({ initialProjects, initialSocials, initialExp
         gsap.fromTo('.about-card', { opacity: 0, scale: 0.9, y: 50 }, { opacity: 1, scale: 1, y: 0, duration: 1.2, ease: 'power3.out', scrollTrigger: getScrollTrigger('.about-card') });
 
         // Experience
-        gsap.fromTo('.experience-line-fill', { scaleY: 0 }, { scaleY: 1, ease: 'none', scrollTrigger: { trigger: '.experience-timeline', start: 'top 65%', end: 'bottom 65%', scrub: true } });
         gsap.fromTo('.experience-item', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.9, stagger: 0.2, ease: 'power3.out', scrollTrigger: getScrollTrigger('#experience') });
 
         // Skills
-        gsap.fromTo('.skill-category-title', { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.8, stagger: 0.2, ease: 'power3.out', scrollTrigger: getScrollTrigger('#skills') });
-        gsap.fromTo('.skill-card', { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.05, ease: 'power2.out', scrollTrigger: getScrollTrigger('#skills') });
+        gsap.fromTo('.skill-card', { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.05, ease: 'power2.out', clearProps: 'transform,opacity', scrollTrigger: getScrollTrigger('#skills') });
 
         // Connect
         gsap.fromTo('.connect-section .section-title, .connect-text', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1, stagger: 0.15, ease: 'power3.out', scrollTrigger: getScrollTrigger('.connect-section') });
@@ -289,24 +304,12 @@ export default function HomeClient({ initialProjects, initialSocials, initialExp
     return () => { clearTimeout(timeout); ctx.revert(); };
   }, []);
 
-  const railSections = useMemo(
-    () => [
-      { id: 'hero', label: 'Home' },
-      { id: 'about', label: 'About' },
-      ...(experience.length > 0 ? [{ id: 'experience', label: 'Experience' }] : []),
-      { id: 'skills', label: 'Skills' },
-      { id: 'projects', label: 'Projects' },
-      { id: 'connect', label: 'Connect' },
-    ],
-    [experience.length]
-  );
-
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <>
       <JellyCursor />
-      <ScrollProgress sections={railSections} />
+      <ScrollProgress />
       <BackToTop />
       <div style={{ overflowX: 'hidden', width: '100%', position: 'relative', minHeight: '100vh' }}>
         {/* WebGL Background */}
@@ -343,10 +346,6 @@ export default function HomeClient({ initialProjects, initialSocials, initialExp
                 <HeroPortrait />
               </div>
             </div>
-            <a href="#about" className="hero-scroll" aria-label="Scroll to About">
-              <span className="hero-scroll-text">Scroll</span>
-              <span className="hero-scroll-line" aria-hidden="true" />
-            </a>
           </section>
 
           {/* ── About ───────────────────────────────────────────────────── */}
@@ -379,15 +378,30 @@ export default function HomeClient({ initialProjects, initialSocials, initialExp
                 </div>
               </div>
               <div className="about-card">
-                <ul className="now-card" aria-label="A quick snapshot">
-                  <li className="now-head"><span>now.md</span><i aria-hidden="true" /></li>
-                  <li><span className="now-k">based in</span><span className="now-v">Pakistan</span></li>
-                  <li><span className="now-k">working at</span><span className="now-v">Canzova Digital</span></li>
-                  <li><span className="now-k">building with</span><span className="now-v">React · Next.js · Node.js</span></li>
-                  <li><span className="now-k">exploring</span><span className="now-v">design trends &amp; creative tech</span></li>
-                  <li><span className="now-k">fuelled by</span><span className="now-v">chai ☕</span></li>
-                  <li><span className="now-k">open to</span><span className="now-v now-hl">internships &amp; freelance</span></li>
-                </ul>
+                <div className="craft-stack" role="group" aria-label="What I care about. Click a card to bring it to the front.">
+                  {CRAFT_CARDS.map((c, i) => (
+                    <article
+                      key={c.title}
+                      className="craft-card"
+                      data-pos={craftOrder.indexOf(i)}
+                      data-tone={i}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${c.title}: ${c.text}`}
+                      onClick={() => setCraftOrder((o) => [i, ...o.filter((n) => n !== i)])}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setCraftOrder((o) => [i, ...o.filter((n) => n !== i)]);
+                        }
+                      }}
+                    >
+                      <span className="craft-num">0{i + 1}</span>
+                      <h3>{c.title}</h3>
+                      <p>{c.text}</p>
+                    </article>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
@@ -397,29 +411,20 @@ export default function HomeClient({ initialProjects, initialSocials, initialExp
           <section id="experience" className="experience-section">
             <div className="section-container">
               <h2 className="section-title">Experience</h2>
-              <div className="experience-timeline">
-                <div className="experience-line" aria-hidden="true">
-                  <div className="experience-line-fill" />
-                </div>
-                <ol className="experience-list">
-                {experience.map((job) => (
+              <ol className="experience-list">
+                {experience.map((job, idx) => (
                   <li key={job.id} className="experience-item">
-                    <span className="experience-marker" aria-hidden="true" />
-                    <div className="experience-card">
-                      <div className="experience-head">
-                        <div>
-                          <h3 className="experience-role">{job.role}</h3>
-                          <p className="experience-company">{job.company}</p>
-                        </div>
-                        <span className={`experience-period ${job.is_current ? 'current' : ''}`}>
-                          {job.is_current && <span className="experience-live-dot" aria-hidden="true" />}
-                          {job.period}
-                        </span>
-                      </div>
+                    <span className={`experience-period ${job.is_current ? 'current' : ''}`}>
+                      {job.is_current && <span className="experience-live-dot" aria-hidden="true" />}
+                      {job.period}
+                    </span>
+                    <div className="experience-main">
+                      <h3 className="experience-role">{job.role}</h3>
+                      <p className="experience-company">{job.company}</p>
                       {job.description && <p className="experience-desc">{job.description}</p>}
                       {job.highlights && job.highlights.length > 0 && (
                         <ul className="experience-highlights">
-                          {job.highlights.map((h, i) => <li key={i}>{h}</li>)}
+                          {job.highlights.map((hl, i) => <li key={i}>{hl}</li>)}
                         </ul>
                       )}
                       {job.tags && job.tags.length > 0 && (
@@ -428,10 +433,10 @@ export default function HomeClient({ initialProjects, initialSocials, initialExp
                         </ul>
                       )}
                     </div>
+                    <span className="experience-index" aria-hidden="true">{String(idx + 1).padStart(2, '0')}</span>
                   </li>
                 ))}
                 </ol>
-              </div>
             </div>
           </section>
           )}
@@ -440,20 +445,42 @@ export default function HomeClient({ initialProjects, initialSocials, initialExp
           <section id="skills" className="skills-section">
             <div className="section-container">
               <h2 className="section-title">Skills &amp; Technologies</h2>
-              <div className="skills-container-new">
-                {skillsData.map((category, idx) => (
-                  <div key={idx} className="skill-category">
-                    <h3 className="skill-category-title">{category.category}</h3>
-                    <div className="skills-grid-new">
-                      {category.items.map((skill, i) => (
-                        <div key={i} className="skill-card" style={{ '--hover-color': skill.color } as React.CSSProperties}>
-                          <img src={skill.icon} alt={`${skill.name} — Hannan Khan Tech Stack`} className="skill-icon" loading="lazy" />
+              <div className="ptable-legend" role="group" aria-label="Filter skills by group">
+                {['All', ...skillsData.map((c) => c.category)].map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    className={`ptable-filter${skillFilter === cat ? ' active' : ''}`}
+                    style={{ '--cat': CATEGORY_COLORS[cat] ?? '#ffffff' } as React.CSSProperties}
+                    aria-pressed={skillFilter === cat}
+                    onClick={() => setSkillFilter(cat)}
+                  >
+                    <i aria-hidden="true" />
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              <div className="ptable">
+                {(() => {
+                  let n = 0;
+                  return skillsData.flatMap((category) =>
+                    category.items.map((skill) => {
+                      n += 1;
+                      return (
+                        <div
+                          key={skill.name}
+                          className={`skill-card${skillFilter !== 'All' && skillFilter !== category.category ? ' dim' : ''}`}
+                          style={{ '--hover-color': skill.color, '--cat': CATEGORY_COLORS[category.category] } as React.CSSProperties}
+                        >
+                          <span className="skill-num">{String(n).padStart(2, '0')}</span>
+                          <img src={skill.icon} alt="" className="skill-icon" loading="lazy" />
+                          <span className="skill-symbol">{SKILL_SYMBOLS[skill.name] ?? skill.name.slice(0, 2)}</span>
                           <span className="skill-name">{skill.name}</span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                      );
+                    })
+                  );
+                })()}
               </div>
             </div>
           </section>

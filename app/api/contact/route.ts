@@ -4,7 +4,7 @@ import { NextRequest } from 'next/server';
 import { sql } from '@/lib/db';
 import { ensureMessagesTable, type MessageRow } from '@/lib/messages';
 import { createLead } from '@/lib/leads';
-import { sendContactNotification } from '@/lib/mailer';
+import { sendContactNotification, sendVisitorConfirmation } from '@/lib/mailer';
 
 const SESSION_TOKEN = 'admin_session';
 const SESSION_VALUE = 'authenticated';
@@ -80,6 +80,13 @@ export async function POST(request: NextRequest) {
       await sendContactNotification({ name, email, message });
     } catch (err) {
       console.error('Could not send the contact notification email:', err);
+    }
+
+    // Auto-reply to the visitor so they know it arrived. Also best-effort.
+    try {
+      await sendVisitorConfirmation({ name, email, message });
+    } catch (err) {
+      console.error('Could not send the confirmation email to the visitor:', err);
     }
 
     return Response.json({ success: true }, { status: 201 });

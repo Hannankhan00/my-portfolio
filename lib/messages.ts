@@ -32,6 +32,11 @@ export function ensureMessagesTable(): Promise<void> {
         // 42P07 = the table already exists, which is the normal case
         if (e.code !== '42P07' && !/already exists/i.test(e.message ?? '')) throw err;
       }
+      // Tables made by an older version of this code may lack newer columns.
+      // CREATE TABLE doesn't change an existing table, so add them here (no-op when present).
+      await sql`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS ip_hash TEXT`;
+      await sql`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS is_read BOOLEAN NOT NULL DEFAULT FALSE`;
+      await sql`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`;
     })().catch((err) => {
       ready = null; // retry on the next request
       throw err;
