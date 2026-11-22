@@ -9,10 +9,9 @@ import JellyCursor from './components/JellyCursor';
 import ScrollProgress from './components/ScrollProgress';
 import BackToTop from './components/BackToTop';
 import ContactForm from './components/ContactForm';
-import ProfileCard from './components/ProfileCard';
 import dynamic from 'next/dynamic';
 import ChromaticTextIntro from './components/ChromaticTextIntro';
-import HeroTechSphere from './components/HeroTechSphere';
+import HeroPortrait from './components/HeroPortrait';
 import HeroTypewriter from './components/HeroTypewriter';
 
 const ProjectModal = dynamic(() => import('./components/ProjectModal'), { ssr: false });
@@ -341,7 +340,7 @@ export default function HomeClient({ initialProjects, initialSocials, initialExp
                 </div>
               </div>
               <div className="hero-visual" id="hero-visual">
-                <HeroTechSphere />
+                <HeroPortrait />
               </div>
             </div>
             <a href="#about" className="hero-scroll" aria-label="Scroll to About">
@@ -380,21 +379,15 @@ export default function HomeClient({ initialProjects, initialSocials, initialExp
                 </div>
               </div>
               <div className="about-card">
-                <ProfileCard
-                  name="Hannan Khan"
-                  title="Full Stack Developer"
-                  handle="hannankhan"
-                  status="Open to work ✦"
-                  contactText="Hire Me"
-                  avatarUrl="/assets/hannankhan.webp"
-                  showUserInfo={false}
-                  enableTilt={true}
-                  enableMobileTilt={false}
-                  behindGlowEnabled={true}
-                  behindGlowColor="rgba(168, 85, 247, 0.5)"
-                  innerGradient="linear-gradient(145deg, #2d1b4e 0%, #1a1035 50%, #0f0a1e 100%)"
-                  onContactClick={() => { document.getElementById('connect')?.scrollIntoView({ behavior: 'smooth' }); }}
-                />
+                <ul className="now-card" aria-label="A quick snapshot">
+                  <li className="now-head"><span>now.md</span><i aria-hidden="true" /></li>
+                  <li><span className="now-k">based in</span><span className="now-v">Pakistan</span></li>
+                  <li><span className="now-k">working at</span><span className="now-v">Canzova Digital</span></li>
+                  <li><span className="now-k">building with</span><span className="now-v">React · Next.js · Node.js</span></li>
+                  <li><span className="now-k">exploring</span><span className="now-v">design trends &amp; creative tech</span></li>
+                  <li><span className="now-k">fuelled by</span><span className="now-v">chai ☕</span></li>
+                  <li><span className="now-k">open to</span><span className="now-v now-hl">internships &amp; freelance</span></li>
+                </ul>
               </div>
             </div>
           </section>

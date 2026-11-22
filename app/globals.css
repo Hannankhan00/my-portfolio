@@ -451,98 +451,152 @@ body > div:first-child {
   justify-content: flex-end;
 }
 
-.tech-sphere-scene {
+.portrait {
+  --mx: 0;
+  --my: 0;
   position: relative;
   width: 100%;
-  display: flex;
-  justify-content: center;
+  max-width: 440px;
+  margin-left: auto;
+  aspect-ratio: 4 / 5;
 }
 
-.tech-sphere-aura {
+.portrait-outline {
   position: absolute;
-  inset: 5%;
-  border-radius: 50%;
+  inset: 0;
+  transform: translate(calc(var(--mx) * -14px + 18px), calc(var(--my) * -14px - 14px));
+  border: 1.5px solid rgba(216, 180, 254, 0.35);
+  border-radius: 999px 999px 24px 24px;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* clips the bottom only, so the head can break out of the arch */
+.portrait-stage {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(-30% -15% 0 -15% round 0 0 24px 24px);
+}
+
+.portrait-arch {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 999px 999px 24px 24px;
   background:
-    radial-gradient(circle at 35% 30%, rgba(192, 132, 252, 0.45), transparent 60%),
-    radial-gradient(circle at 70% 75%, rgba(99, 102, 241, 0.35), transparent 60%);
-  filter: blur(46px);
-  pointer-events: none;
+    radial-gradient(120% 80% at 30% 15%, #c084fc 0%, transparent 55%),
+    linear-gradient(170deg, #7c3aed 0%, #4338ca 55%, #1e1b4b 100%);
+  box-shadow: 0 30px 80px rgba(124, 58, 237, 0.35);
 }
 
-.tech-sphere {
-  position: relative;
-  width: 100%;
-  max-width: 540px;
-  aspect-ratio: 1;
-  cursor: grab;
-  touch-action: pan-y;
-  user-select: none;
-}
-
-.tech-sphere:active {
-  cursor: grabbing;
-}
-
-.tech-sphere-core {
+/* film grain so it doesn't look like a flat vector gradient */
+.portrait-arch::after {
+  content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 36%;
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  background: radial-gradient(circle at 35% 30%, rgba(216, 180, 254, 0.35), rgba(30, 20, 52, 0.85) 70%);
-  border: 1px solid rgba(192, 132, 252, 0.35);
-  box-shadow: 0 0 60px rgba(168, 85, 247, 0.4), inset 0 0 30px rgba(168, 85, 247, 0.25);
-  pointer-events: none;
-  z-index: 200; /* always above the pills so the label stays readable */
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+  opacity: 0.55;
 }
 
-.tech-sphere-core-label {
+.portrait-arch-text {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  transform: translateX(calc(-50% + var(--mx) * 24px));
   font-family: var(--font-heading);
-  font-size: clamp(0.95rem, 2.2vw, 1.3rem);
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.02em;
+  font-weight: 800;
+  font-size: clamp(4rem, 13vw, 8.5rem);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.28);
+  user-select: none;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.tech-sphere-core-sub {
-  margin-top: 0.2rem;
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.tech-sphere-item {
+.portrait-img {
   position: absolute;
-  top: 50%;
   left: 50%;
-  padding: 0.35rem 0.8rem;
-  font-family: var(--font-code);
-  font-size: 0.8rem;
-  white-space: nowrap;
-  color: #f3e8ff;
-  background: rgba(30, 20, 52, 0.7);
-  border: 1px solid rgba(192, 132, 252, 0.35);
-  border-radius: 9999px;
-  cursor: pointer;
-  will-change: transform, opacity;
-  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  bottom: -8px; /* overshoots the clip edge so parallax never reveals a gap */
+  width: 120%;
+  max-width: none;
+  height: auto;
+  transform: translate(calc(-50% + var(--mx) * 10px), calc(var(--my) * -5px));
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
 }
 
-.tech-sphere-item:hover,
-.tech-sphere-item:focus-visible,
-.tech-sphere-item.active {
-  background: rgba(168, 85, 247, 0.5);
-  border-color: #d8b4fe;
-  box-shadow: 0 0 22px rgba(192, 132, 252, 0.7);
-  outline: none;
+.portrait-badge {
+  position: absolute;
+  left: -2.5rem;
+  bottom: 12%;
+  z-index: 5;
+  width: 124px;
+  height: 124px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f5f0ff;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  transform: translate(calc(var(--mx) * -12px), calc(var(--my) * -12px));
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.portrait-badge-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: portrait-spin 18s linear infinite;
+}
+
+.portrait-badge-ring text {
+  font-family: var(--font-code);
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  fill: #2e1065;
+}
+
+.portrait-badge-core {
+  font-size: 1.6rem;
+  color: #7c3aed;
+  line-height: 1;
+}
+
+@keyframes portrait-spin {
+  to { transform: rotate(360deg); }
+}
+
+.portrait-tag {
+  position: absolute;
+  z-index: 5;
+  right: -0.5rem;
+  top: 14%;
+  padding: 0.45rem 0.9rem;
+  font-family: var(--font-code);
+  font-size: 0.78rem;
+  color: #1e1b4b;
+  background: #e9d5ff;
+  border-radius: 8px;
+  transform: rotate(6deg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.portrait-star {
+  position: absolute;
+  z-index: 5;
+  left: 6%;
+  top: 8%;
+  font-size: 2.2rem;
+  color: #e9d5ff;
+  text-shadow: 0 0 24px rgba(192, 132, 252, 0.9);
+  animation: portrait-spin 14s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portrait-badge-ring, .portrait-star { animation: none; }
 }
 
 /* 3D Floating Glass Developer Terminal Card */
@@ -1238,6 +1292,62 @@ body > div:first-child {
   flex-shrink: 0;
 }
 
+.now-card {
+  list-style: none;
+  margin: 0;
+  padding: 0.4rem 1.5rem 0.8rem;
+  position: relative;
+  background: rgba(15, 11, 26, 0.6);
+  border: 1px solid rgba(192, 132, 252, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: rotate(1.5deg);
+  font-family: var(--font-code);
+}
+
+.now-card li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.now-card li:last-child { border-bottom: 0; }
+
+.now-head {
+  flex-direction: row !important;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.now-head i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 10px #4ade80;
+}
+
+.now-k {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c084fc;
+}
+
+.now-v { font-size: 0.95rem; color: #fff; }
+
+.now-hl {
+  align-self: flex-start;
+  padding: 0.05rem 0.5rem;
+  background: rgba(168, 85, 247, 0.28);
+  border-radius: 6px;
+}
+
 /* Responsive: stack vertically on smaller screens */
 @media (max-width: 900px) {
   .about-container {
@@ -1251,7 +1361,8 @@ body > div:first-child {
     width: 100%;
   }
   .about-card {
-    width: 260px;
+    width: 100%;
+    max-width: 380px;
     margin: 0 auto;
   }
 }
@@ -1262,7 +1373,7 @@ body > div:first-child {
     flex-wrap: wrap;
   }
   .about-card {
-    width: 240px;
+    width: 100%;
   }
 }
 
@@ -2121,8 +2232,9 @@ body > div:first-child {
     justify-content: center;
   }
 
-  .tech-sphere {
-    max-width: 400px;
+  .portrait {
+    margin: 0 auto;
+    max-width: 380px;
   }
 }
 
@@ -2160,22 +2272,8 @@ body > div:first-child {
     padding: 0.8rem 2.2rem;
   }
 
-  .tech-sphere {
-    max-width: 360px;
-  }
-
-  .tech-sphere-item {
-    font-size: 0.7rem;
-    padding: 0.28rem 0.65rem;
-  }
-
-  .tech-sphere-core-sub {
-    display: none;
-  }
-
-  .tech-sphere-core {
-    width: 30%;
-  }
+  .portrait-badge { left: -0.5rem; width: 104px; height: 104px; }
+  .portrait-tag { right: 0; }
 }
 
 @media (max-width: 767px) {
